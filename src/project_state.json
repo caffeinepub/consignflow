@@ -1,10 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "ConsignFlow: a web app for managing consignment sales teams, tracking products, reps, consignments, sales, returns, and payouts, with dashboards, CSV export, and printable monthly statements.",
+  "projectStateVersion": 7,
+  "summary": "ConsignFlow: a web app for managing consignment sales teams (products, reps, consignments, sales, returns, payouts) with dashboards, exports, and printable statements, now expanding in Version 2 to include end-user captivation features: enhanced UI/visual hierarchy with animations, onboarding, guided/stateful workflows informed by history, identity/role-based analytics (originality scoring via advanced histograms), and personalized gradient UI transforms based on user favorite color sets.",
   "architectural_notes": [
     "Consignments, sales, and returns are itemized (line items with product, quantity, and transaction date) and associated to a rep.",
-    "Dashboards must compute balances owed per rep and inventory by rep; profit/commission derived via configurable rules."
+    "Dashboards must compute balances owed per rep and inventory by rep; profit/commission derived via configurable rules.",
+    "Version 2 includes onboarding and history-driven, stateful guided flows to direct user actions contextually.",
+    "Version 2 introduces identity/role-based analytics (originality scoring using histogram-based metrics) derived from onboarding and user behavior.",
+    "UI personalization will support user-selected color sets and gradient-based theme transforms applied consistently across modules.",
+    "Introduce Settlement Periods (open/closed) that lock transactional edits within a date range upon close; only Adjustment entries allowed post-close; next period opening balance must equal prior period closing balance and statements link to the period."
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -38,6 +42,78 @@
       "title": "Define and apply a coherent visual theme for ConsignFlow (colors, typography, spacing, and component styling) that is consistent across dashboard, forms, tables, and print views; avoid blue/purple as primary brand colors.",
       "reqIds": [
         "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-onboarding-module-that-guides-new-users-through-initial-setup-and-first-workflows-create-reps-create-products-create-first-consignment-and-make-the-onboarding-accessible-later-from-within-the-app",
+      "title": "Add an onboarding module that guides new users through initial setup and first workflows (create Reps, create Products, create first Consignment), and make the onboarding accessible later from within the app.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-user-personalization-for-ui-theming-capture-a-user-s-favorite-color-sets-during-onboarding-and-editable-later-and-apply-a-gradient-driven-ui-transform-across-the-app-that-uses-those-colors-while-keeping-the-existing-overall-design-coherent-and-accessible",
+      "title": "Implement user personalization for UI theming: capture a user's favorite color sets during onboarding (and editable later), and apply a gradient-driven UI transform across the app that uses those colors while keeping the existing overall design coherent and accessible.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-identity-role-based-analytics-that-computes-and-displays-an-originality-metric-derived-from-onboarding-deltas-and-histogram-based-scoring-and-make-the-results-visible-in-a-dedicated-analytics-view-and-or-within-onboarding-completion",
+      "title": "Add identity/role-based analytics that computes and displays an 'originality metric' derived from onboarding deltas and histogram-based scoring, and make the results visible in a dedicated analytics view and/or within onboarding completion.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-guided-stateful-workflows-that-use-the-user-s-historical-activity-consignments-sales-returns-payouts-and-onboarding-status-to-recommend-next-best-actions-and-provide-a-wizard-like-flow-to-complete-them",
+      "title": "Implement guided, stateful workflows that use the user's historical activity (consignments/sales/returns/payouts) and onboarding status to recommend next-best actions and provide a wizard-like flow to complete them.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-end-user-captivation-via-improved-layout-hierarchy-and-animations-transitions-across-the-onboarding-and-guided-workflows-while-maintaining-performance-and-keeping-existing-core-entity-pages-functional",
+      "title": "Enhance end-user captivation via improved layout hierarchy and animations/transitions across the onboarding and guided workflows, while maintaining performance and keeping existing core entity pages functional.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-frontend-settlement-periods-management-ui-to-create-view-and-close-settlement-periods-and-to-navigate-to-linked-statements-for-a-period",
+      "title": "Add a frontend Settlement Periods management UI to create, view, and close settlement periods, and to navigate to linked statements for a period.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-statements-generation-ui-to-support-settlement-periods-allow-selecting-a-settlement-period-in-addition-to-or-instead-of-month-year-show-opening-balance-and-closing-balance-for-that-period-and-persist-link-the-generated-statement-to-the-settlement-period",
+      "title": "Update statements generation UI to support settlement periods: allow selecting a settlement period (in addition to or instead of month/year), show opening balance and closing balance for that period, and persist/link the generated statement to the settlement period.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enforce-settlement-locking-in-the-frontend-when-a-user-attempts-to-create-or-edit-consignments-sales-returns-or-payouts-dated-within-a-closed-settlement-period-block-the-action-in-the-ui-and-explain-that-the-period-is-closed-provide-a-path-to-create-an-adjustment-instead",
+      "title": "Enforce settlement locking in the frontend: when a user attempts to create or edit consignments, sales, returns, or payouts dated within a closed settlement period, block the action in the UI and explain that the period is closed; provide a path to create an Adjustment instead.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-adjustments-ui-for-recording-and-listing-adjustments-including-the-ability-to-enter-adjustments-dated-within-closed-settlement-periods",
+      "title": "Add an Adjustments UI for recording and listing adjustments, including the ability to enter adjustments dated within closed settlement periods.",
+      "reqIds": [
+        "REQ-20"
       ],
       "version": 1
     }
@@ -88,6 +164,74 @@
       "summary": "Add CSV export for core entities and key reports, including exports for: Products, Reps, Consignments, Sales, Returns, Payouts, and dashboard report exports (owed-by-rep and inventory-by-rep).",
       "reqIds": [
         "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add onboarding module to guide new users through initial setup and core workflows (reps, products, consignments) with a polished, captivation-focused experience.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Enhance UI for end-user captivation: improved layout/visual hierarchy, animations/transitions, and deeper contextual integration across modules.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement guided, stateful workflows that use historical activity to direct users contextually (wizard-like flows and next-best actions based on prior consignments/sales/returns).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add identity/role-based analytics including an 'originality metric' derived from onboarding deltas and advanced histogram scoring to measure user/platform fit and orthogonality of identity traits.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add user personalization for UI theming: capture user favorite color sets and apply gradient-based UI transforms across the app to reflect preferences consistently.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Persist per-user onboarding state and user personalization settings (including favorite color sets, traits, and roles) keyed by the authenticated Internet Identity principal, and expose read/write APIs for the frontend to load and update that profile.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Add Settlement Periods with startDate/endDate and open/closed status; link generated statements; on close lock edits to consignments/sales/returns/payouts within the period (allow adjustments only) and carry forward closing balance as next period opening balance.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Implement backend data model and APIs for Settlement Periods with fields: startDate, endDate, status (open/closed), and links to generated statements.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Add backend support for Adjustments and enforce settlement locking rules: when a settlement period is closed, prevent creation/edits of consignments, sales, returns, and payouts dated within that closed period; allow only adjustments dated within that range.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Implement settlement close accounting: on close, compute and store per-rep closing balances for the period and carry them forward as the next period’s opening balances.",
+      "reqIds": [
+        "REQ-16"
       ],
       "status": "pending"
     }

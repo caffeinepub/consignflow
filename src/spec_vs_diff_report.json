@@ -1,84 +1,86 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T15:10:30.024Z",
-  "summary": "Diff adds a Motoko backend with basic add/get/list methods and a React frontend with routing, dashboard calculations (including commission settings), date filtering UI, and CSV utilities. However, several backend requirements (persistent upgrade-safe storage, full CRUD, filtering, and multi-line-item records) are not evidenced in the diff summary. Some authentication scaffolding (Internet Identity provider/hooks) appears added despite not being requested as part of the build requirements.",
+  "generatedAt": "2026-02-07T17:14:41.343Z",
+  "summary": "The diff adds backend scaffolding for settlement periods and adjustments (including state migration), adds Settlement Periods + Adjustments pages and navigation, and introduces a frontend settlement-lock utility and UI checks on several create flows. However, key statement-period integration (REQ-18) is not implemented in the shown Statements UI, and several backend settlement-period invariants/APIs and accounting carry-forward requirements cannot be confirmed from the truncated backend diff.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Entities that contain items (Consignments, Sales, Returns) support multiple line items per record (product + quantity, unit price for sales), and backend data persists across canister upgrades.",
-      "reason": "Backend models shown represent consignments/sales/returns as single productId+quantity records rather than a parent record with multiple line items. Also no stable/upgrade persistence mechanism (e.g., stable vars / preupgrade/postupgrade serialization) is shown; maps are initialized with `let ... = Map.empty` and ID counters are `var`, which would typically reset on upgrade unless explicitly persisted.",
+      "id": "REQ-14",
+      "requirement": "Backend exposes APIs to create/list/fetch-by-id/close settlement periods; prevents overlapping periods; closed periods are immutable; and stores retrievable statement link(s) per period.",
+      "reason": "The diff shows SettlementPeriod types/storage and some frontend hooks usage, but the backend API surface and invariants (non-overlap, immutability, get-by-id, statement links retrieval) are not evidenced in the truncated backend/main.mo snippet or elsewhere in the diff summary.",
       "evidence": [
-        "backend/main.mo"
+        "backend/main.mo (truncated; only shows type definitions and addConsignment calling enforceSettlementLock)",
+        "backend/migration.mo (adds settlements with statementIds, but no API behavior shown)"
       ]
     },
     {
-      "id": "REQ-2",
-      "requirement": "Expose backend CRUD APIs for all core entities, including update and delete, plus list endpoints supporting filtering by repId and date range for dated records.",
-      "reason": "Only add/get/getAll are shown for entities; no update/delete methods are evidenced. List endpoints shown are `getAllX()` with no parameters, and no filtering by repId/date range is shown.",
+      "id": "REQ-15",
+      "requirement": "Backend supports Adjustments APIs (create + list) and enforces locking for addConsignment/addSale/addReturn/addPayout by rejecting dates within closed periods with deterministic English errors; addAdjustment must still be allowed within closed periods.",
+      "reason": "The backend snippet only shows lock enforcement in addConsignment; enforcement for addSale/addReturn/addPayout and adjustment APIs/allowance behavior are not visible in the diff summary due to truncation.",
       "evidence": [
-        "backend/main.mo"
+        "backend/main.mo (truncated; only addConsignment shows enforceSettlementLock)",
+        "backend/migration.mo (adds adjustments map, but no API behavior shown)"
       ]
     },
     {
-      "id": "REQ-2",
-      "requirement": "Validation errors are returned in a user-consumable way (e.g., missing rep/product, negative quantities/prices rejected).",
-      "reason": "Backend methods shown do not validate that repId/productId exist on creation, and types use Nat/Nat64 which avoid negatives but still allow zero quantities/prices; no explicit validation or structured error responses are evidenced (only traps on missing get).",
+      "id": "REQ-16",
+      "requirement": "On close, compute/store per-rep closing balances and carry them forward as next period opening balances; expose an API to retrieve per-rep opening/closing balances for a period.",
+      "reason": "While SettlementPeriod includes openingBalances/closingBalances fields in state, the diff summary does not show close-period accounting logic, deterministic carry-forward behavior on creation of subsequent periods, or a dedicated retrieval API for balances.",
       "evidence": [
-        "backend/main.mo"
+        "backend/migration.mo (adds openingBalances/closingBalances fields but no computation logic)",
+        "backend/main.mo (truncated; does not show close accounting or carry-forward)"
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "requirement": "Settlement Periods UI must allow navigating to linked statements for a period (rep/period statement references) and show those references on the period detail/selection.",
+      "reason": "SettlementPeriodsPage is truncated and only clearly shows create/close and listing scaffolding; no evidence is shown for displaying statement references (e.g., statementIds) and opening a statement view for a rep/period.",
+      "evidence": [
+        "frontend/src/pages/SettlementPeriodsPage.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "requirement": "Statements UI supports selecting a settlement period (in addition to or instead of month/year), displays opening/closing balances for that period using backend-provided values, and persists/links a generated statement to the settlement period; monthly flow must remain functional.",
+      "reason": "StatementsPage remains explicitly a 'Monthly Statements' page with month/year selection and no settlement-period selection, no opening/closing balances sourced from settlement periods, and no persistence/linking of generated statements to a settlement period.",
+      "evidence": [
+        "frontend/src/pages/StatementsPage.tsx (shows month/year selection; title 'Monthly Statements'; no settlement period selection/linking)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Internet Identity authentication scaffolding (provider/hooks and actor creation varying by identity) added even though the BuildRequest does not require adding authentication at this stage.",
-      "reason": "BuildRequest constrains auth providers if authentication is added later, but does not request implementing authentication now. The diff adds `InternetIdentityProvider`, `useInternetIdentity`, and identity-aware actor creation.",
+      "description": "Added footer branding and copyright year ('© 2026. Built with ... caffeine.ai')",
+      "reason": "Not requested by any requirement; BuildRequest focuses on settlement periods/locking/adjustments/statements integration and includes constraints about not modifying certain frontend paths, but does not request new branding/footer content.",
       "evidence": [
-        "frontend/src/main.tsx",
-        "frontend/src/hooks/useInternetIdentity.ts",
-        "frontend/src/hooks/useActor.ts"
+        "frontend/src/components/AppLayout.tsx"
       ]
     },
     {
-      "description": "Footer branding/link and extra icon usage (react-icons SiCoffeescript) unrelated to requirements.",
-      "reason": "Not mentioned in requirements (theme/coherent UI is required, but specific third-party branding/footer content is not requested).",
+      "description": "Introduced new routes/pages for Adjustments and Settlement Periods (beyond just integrating with statements)",
+      "reason": "While Adjustments and Settlement Periods pages are requested (REQ-17, REQ-20), the diff also adds navigation and routing changes that may include additional layout/navigation changes not explicitly requested (e.g., new nav icons/tabs).",
       "evidence": [
+        "frontend/src/App.tsx",
         "frontend/src/components/AppLayout.tsx"
       ]
     }
   ],
-  "confidence": 0.66,
+  "confidence": 0.64,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
     "frontend/src/App.tsx",
     "frontend/src/components/AppLayout.tsx",
-    "frontend/src/components/CommissionSettingsDialog.tsx",
-    "frontend/src/components/DateRangeFilter.tsx",
-    "frontend/src/components/LineItemsEditor.tsx",
-    "frontend/src/components/ProductSelect.tsx",
-    "frontend/src/components/RepSelect.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/lib/calculations.ts",
-    "frontend/src/lib/commissionSettings.ts",
-    "frontend/src/lib/csv.ts",
-    "frontend/src/lib/dateUtils.ts",
-    "frontend/src/main.tsx",
+    "frontend/src/lib/settlementLock.ts",
+    "frontend/src/pages/AdjustmentsPage.tsx",
     "frontend/src/pages/ConsignmentsPage.tsx",
-    "frontend/src/pages/DashboardPage.tsx",
     "frontend/src/pages/PayoutsPage.tsx",
-    "frontend/src/pages/ProductsPage.tsx",
-    "frontend/src/pages/RepsPage.tsx",
     "frontend/src/pages/ReturnsPage.tsx",
     "frontend/src/pages/SalesPage.tsx",
+    "frontend/src/pages/SettlementPeriodsPage.tsx",
     "frontend/src/pages/StatementsPage.tsx",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

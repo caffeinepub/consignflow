@@ -9,6 +9,8 @@ import SalesPage from './pages/SalesPage';
 import ReturnsPage from './pages/ReturnsPage';
 import PayoutsPage from './pages/PayoutsPage';
 import StatementsPage from './pages/StatementsPage';
+import SettlementPeriodsPage from './pages/SettlementPeriodsPage';
+import AdjustmentsPage from './pages/AdjustmentsPage';
 import AppLayout from './components/AppLayout';
 
 const rootRoute = createRootRoute({
@@ -73,6 +75,18 @@ const statementsRoute = createRoute({
   component: StatementsPage,
 });
 
+const settlementPeriodsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settlement-periods',
+  component: SettlementPeriodsPage,
+});
+
+const adjustmentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/adjustments',
+  component: AdjustmentsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   dashboardRoute,
@@ -83,6 +97,8 @@ const routeTree = rootRoute.addChildren([
   returnsRoute,
   payoutsRoute,
   statementsRoute,
+  settlementPeriodsRoute,
+  adjustmentsRoute,
 ]);
 
 const router = createRouter({ routeTree });

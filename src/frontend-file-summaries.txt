@@ -1,7 +1,7 @@
 {
-  "frontend/src/App.tsx": "Main application component with TanStack Router setup, defining all routes (dashboard, products, reps, consignments, sales, returns, payouts, statements) and wrapping with ThemeProvider and Toaster.",
-  "frontend/src/components/AppLayout.tsx": "Application layout component with header, navigation tabs, main content area, and footer; provides consistent structure across all pages.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including products, reps, consignments, sales, returns, and payouts with proper caching and invalidation.",
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup, defining all routes including new settlement-periods and adjustments routes, wrapped with ThemeProvider and Toaster.",
+  "frontend/src/components/AppLayout.tsx": "Application layout component with header, navigation tabs (including Settlement Periods and Adjustments), main content area, and footer; provides consistent structure across all pages.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including products, reps, consignments, sales, returns, payouts, settlement periods, and adjustments with proper caching and invalidation; imports SettlementStatus as a value (not type-only) to use as enum.",
   "frontend/src/lib/calculations.ts": "Pure calculation functions for rep balances (sales - returns - payouts with commission) and inventory aggregation (consignments - sales - returns) with date filtering support.",
   "frontend/src/lib/commissionSettings.ts": "Commission configuration management with localStorage persistence, supporting default commission rate and per-rep overrides.",
   "frontend/src/lib/csv.ts": "CSV generation and download utilities with proper escaping, plus formatting helpers for dates and currency.",
@@ -14,11 +14,14 @@
   "frontend/src/components/CommissionSettingsDialog.tsx": "Dialog for configuring default commission rate and per-rep overrides with validation.",
   "frontend/src/pages/ProductsPage.tsx": "Products management page with list view, search, add dialog, and CSV export.",
   "frontend/src/pages/RepsPage.tsx": "Reps management page with list view, search, add dialog, and CSV export.",
-  "frontend/src/pages/ConsignmentsPage.tsx": "Consignments page with multi-line item creation, date filtering, list view, and CSV export.",
-  "frontend/src/pages/SalesPage.tsx": "Sales page with multi-line item creation including unit prices, date filtering, list view, and CSV export.",
-  "frontend/src/pages/ReturnsPage.tsx": "Returns page with multi-line item creation, date filtering, list view, and CSV export.",
-  "frontend/src/pages/PayoutsPage.tsx": "Payouts page with creation form including notes field, date filtering, list view, and CSV export.",
-  "frontend/src/pages/StatementsPage.tsx": "Monthly statements page with rep/month selection, detailed itemized view of sales/returns/payouts, summary calculations, and print-optimized layout.",
+  "frontend/src/pages/ConsignmentsPage.tsx": "Consignments page with multi-line item creation, date filtering, list view, CSV export, and settlement lock validation that blocks submission and shows adjustment link when date is in closed period.",
+  "frontend/src/pages/SalesPage.tsx": "Sales page with multi-line item creation including unit prices, date filtering, list view, CSV export, and settlement lock validation with adjustment link.",
+  "frontend/src/pages/ReturnsPage.tsx": "Returns page with multi-line item creation, date filtering, list view, CSV export, and settlement lock validation with adjustment link.",
+  "frontend/src/pages/PayoutsPage.tsx": "Payouts page with creation form including notes field, date filtering, list view, CSV export, and settlement lock validation with adjustment link.",
+  "frontend/src/pages/StatementsPage.tsx": "Monthly statements page with rep/month selection, detailed itemized view of sales/returns/payouts, summary calculations using RepBalance properties (totalSales, totalReturns, commission, totalPayouts, amountOwed), and print-optimized layout.",
   "frontend/src/index.css": "Global styles with OKLCH color system using charcoal + green accent palette (avoiding blue/purple), plus print-specific styles for clean statement printing.",
-  "frontend/tailwind.config.js": "Tailwind configuration with Inter font family and extended design tokens matching the charcoal + green theme."
+  "frontend/tailwind.config.js": "Tailwind configuration with Inter font family and extended design tokens matching the charcoal + green theme.",
+  "frontend/src/lib/settlementLock.ts": "Utility functions to check if a date falls within a closed settlement period and format settlement period dates for display.",
+  "frontend/src/pages/SettlementPeriodsPage.tsx": "Settlement periods management page with list view, create period dialog with date validation, and close period confirmation using AlertDialog; correctly checks SettlementStatus enum values.",
+  "frontend/src/pages/AdjustmentsPage.tsx": "Adjustments page with list view and create adjustment dialog; allows recording adjustments for closed settlement periods with rep, amount, date, and notes."
 }

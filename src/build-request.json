@@ -1,149 +1,171 @@
 {
   "kind": "build_request",
-  "title": "ConsignFlow: Consignment sales tracking with dashboards, CSV export, and printable monthly statements",
+  "title": "Add Settlement Periods with close/lock rules, adjustments, and balance carry-forward",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Implement backend data models and persistent storage for: Products, Reps, Consignments (rep + line items with product + quantity + date), Sales (rep + line items with product + quantity + unit price + date), Returns (rep + line items with product + quantity + date), and Payouts (rep + amount + date + notes/reference).",
+      "id": "REQ-14",
+      "text": "Implement backend data model and APIs for Settlement Periods with fields: startDate, endDate, status (open/closed), and links to generated statements.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Build a web app ConsignFlow for consignment sales teams. Entities: products, reps, consignments (rep + items + qty + date), sales (rep + items + qty + price), returns, payouts."
+          "Add ‘Settlement Periods’. A period has startDate, endDate, status=open/closed, and links to generated statements."
         ]
       },
       "acceptanceCriteria": [
-        "All listed entities are represented in the backend with stable unique IDs and timestamps where applicable.",
-        "Entities that contain items support multiple line items per record (product + quantity, and unit price for sales).",
-        "Data persists across canister upgrades (no data loss on redeploy/upgrade)."
+        "Backend exposes a persistent SettlementPeriod type with startDate, endDate, and status=open|closed.",
+        "Backend exposes APIs to create a new settlement period, list all periods, fetch a period by id, and close a period.",
+        "Settlement periods cannot overlap in date ranges (backend rejects create/close if the resulting set would overlap).",
+        "A closed settlement period is immutable (backend rejects attempts to reopen or change dates/status other than the initial close action).",
+        "Settlement period includes stored statement link(s) that can be retrieved later (e.g., per-rep statement references for that period)."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Expose backend CRUD APIs for all core entities (Products, Reps, Consignments, Sales, Returns, Payouts), including list/filter endpoints needed by the dashboard and statements (at minimum: filter by rep and date range).",
+      "id": "REQ-15",
+      "text": "Add backend support for Adjustments and enforce settlement locking rules: when a settlement period is closed, prevent creation/edits of consignments, sales, returns, and payouts dated within that closed period; allow only adjustments dated within that range.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Build a web app ConsignFlow for consignment sales teams. Entities: products, reps, consignments (rep + items + qty + date), sales (rep + items + qty + price), returns, payouts."
+          "When closed: prevent edits to consignments/sales/returns/payouts in that date range; allow only adjustments."
         ]
       },
       "acceptanceCriteria": [
-        "Frontend can create, read, update, and delete each entity type via canister calls.",
-        "List endpoints support filtering by repId and date range for records that have a date (consignments, sales, returns, payouts).",
-        "Validation errors are returned in a user-consumable way (e.g., missing rep/product, negative quantities/prices rejected)."
+        "Backend defines an Adjustment record type that can represent stock and/or money adjustments with a date and a user-entered reason/note.",
+        "Backend exposes APIs to create and list adjustments (at minimum: list all; optionally by rep and/or date range).",
+        "On addConsignment/addSale/addReturn/addPayout: backend rejects any new record whose date falls within any closed settlement period (with a clear error message).",
+        "On addAdjustment: backend allows creating adjustments even when the adjustment date falls within a closed settlement period.",
+        "Frontend-facing error messages for lock violations are in English and are deterministic/consistent (no generic traps like \"Runtime.trap\" without context)."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Build frontend screens for managing core entities with basic workflows: Products, Reps, Consignments, Sales, Returns, and Payouts (create/edit forms, list views, and record detail views).",
+      "id": "REQ-16",
+      "text": "Implement settlement close accounting: on close, compute and store per-rep closing balances for the period and carry them forward as the next period’s opening balances.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Carry forward closing balance as next period opening balance."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Closing a settlement period computes a per-rep closing balance using only inputs in scope (opening balance + period sales/returns/payouts + adjustments) and stores the results with the closed period.",
+        "Creating a subsequent settlement period sets its per-rep opening balances equal to the immediately preceding period’s stored closing balances (for each rep) when such a prior period exists.",
+        "If there is no prior closed period for a rep, opening balance defaults to 0 for that rep.",
+        "Backend exposes an API to retrieve a period’s per-rep opening/closing balances so the frontend can display them on statements/period detail views.",
+        "Balance carry-forward is deterministic and reproducible by re-running the same calculation over stored records for the period."
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Add a frontend Settlement Periods management UI to create, view, and close settlement periods, and to navigate to linked statements for a period.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Entities: products, reps, consignments (rep + items + qty + date), sales (rep + items + qty + price), returns, payouts."
+          "Add ‘Settlement Periods’... and links to generated statements."
         ]
       },
       "acceptanceCriteria": [
-        "Each entity has a dedicated list view with search and/or basic filtering (at minimum by rep and date where applicable).",
-        "Users can create and edit records, including adding/removing multiple line items for consignments/sales/returns.",
-        "UI prevents selecting invalid values (e.g., must pick an existing rep; line items must pick an existing product)."
+        "App navigation includes a new entry \"Settlement Periods\" that routes to a new page.",
+        "Settlement Periods page shows a list of periods with start date, end date, and status (Open/Closed).",
+        "User can create a new open period by selecting startDate and endDate; the UI validates obvious issues (missing dates, end before start) before calling the backend.",
+        "User can close an open period via an explicit confirmation step; after success, the period displays as Closed.",
+        "For a selected period, UI shows the linked statement references and provides a way to open the corresponding statement view for a rep/period.",
+        "All user-facing text is in English."
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Implement dashboard calculations and views: (1) amount owed to each rep, (2) inventory by rep, and (3) profit/commission calculations based on configurable commission rules.",
+      "id": "REQ-18",
+      "text": "Update statements generation UI to support settlement periods: allow selecting a settlement period (in addition to or instead of month/year), show opening balance and closing balance for that period, and persist/link the generated statement to the settlement period.",
       "target": "both",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Dashboard: owed to each rep, inventory by rep, profit/commission rules."
+          "...links to generated statements.",
+          "Carry forward closing balance as next period opening balance."
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard shows a table of reps with 'Amount Owed' computed from sales minus returns minus payouts, adjusted by commission rules.",
-        "Dashboard shows inventory by rep computed from consignments minus sales minus returns (quantities aggregated by product).",
-        "Commission rules are configurable in-app (at minimum: a default commission % and the ability to override per rep), and the dashboard reflects the chosen configuration.",
-        "All calculations are consistent between dashboard, CSV exports, and printable statements for the same inputs/date range."
+        "Statements UI can be generated for a settlement period date range (startDate–endDate) and a selected rep.",
+        "Statement view displays opening balance and closing balance for the selected settlement period using backend-provided values.",
+        "When a statement is generated/printed for a rep + settlement period, the app stores a statement reference/link on the backend and shows it under that settlement period later.",
+        "Existing monthly statement flow remains functional (at minimum) until settlement-period statements fully cover the same use case."
       ]
     },
     {
-      "id": "REQ-5",
-      "text": "Add CSV export for core entities and key reports, including exports for: Products, Reps, Consignments, Sales, Returns, Payouts, and dashboard report exports (owed-by-rep and inventory-by-rep).",
+      "id": "REQ-19",
+      "text": "Enforce settlement locking in the frontend: when a user attempts to create or edit consignments, sales, returns, or payouts dated within a closed settlement period, block the action in the UI and explain that the period is closed; provide a path to create an Adjustment instead.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Add CSV export"
+          "When closed: prevent edits to consignments/sales/returns/payouts in that date range; allow only adjustments."
         ]
       },
       "acceptanceCriteria": [
-        "Each relevant screen provides an 'Export CSV' action that downloads a UTF-8 CSV file.",
-        "Exports include clear headers and stable columns; line-item entities export with one row per line item (including parent record fields).",
-        "Users can export within a selected date range for dated records (consignments/sales/returns/payouts) and for report exports."
+        "Create flows for consignments, sales, returns, and payouts prevent submission when the chosen date falls within a closed settlement period (UI disables submit or shows validation error).",
+        "If the backend rejects due to a closed period, the UI displays a clear English error message and does not silently fail.",
+        "UI provides a clear next step to record an adjustment (e.g., link/button to the Adjustments page or open an adjustment dialog) when an operation is blocked due to a closed period.",
+        "No changes are made to any frontend immutablePaths listed in SYSTEM_CONTEXT."
       ]
     },
     {
-      "id": "REQ-6",
-      "text": "Generate printable monthly statements per rep that include: sales, returns, payouts, starting balance (if supported), ending balance/amount owed, and summary totals for the selected month; provide a print-friendly layout and a PDF-ready browser print flow.",
+      "id": "REQ-20",
+      "text": "Add an Adjustments UI for recording and listing adjustments, including the ability to enter adjustments dated within closed settlement periods.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "printable monthly statement"
+          "...allow only adjustments."
         ]
       },
       "acceptanceCriteria": [
-        "User can select a rep and a month to generate a statement.",
-        "Statement includes itemized sales, returns, and payouts within the month and a computed ending balance/amount owed.",
-        "Statement has a print stylesheet/layout that prints cleanly on letter/A4 without UI navigation chrome.",
-        "Statement computations match dashboard computations for the same rep/date range."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Define and apply a coherent visual theme for ConsignFlow (colors, typography, spacing, and component styling) that is consistent across dashboard, forms, tables, and print views; avoid blue/purple as primary brand colors.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Build a web app ConsignFlow for consignment sales teams."
-        ]
-      },
-      "acceptanceCriteria": [
-        "UI uses a consistent design system across all screens (tables, buttons, inputs, headings, empty states).",
-        "Primary palette does not use blue/purple as the dominant brand colors.",
-        "Print view uses a simplified theme optimized for readability."
+        "App includes an Adjustments page (or equivalent UI) that lists adjustments with key fields (date, rep if applicable, type, amount/qty, reason/note).",
+        "User can create a new adjustment with a date picker and required fields consistent with the backend Adjustment type.",
+        "Creating an adjustment with a date inside a closed settlement period succeeds and appears in lists and downstream calculations/statement totals for that period (as applicable).",
+        "All user-facing text is in English."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
-    "Do not edit files under frontend/src/components/ui or other immutable paths specified by the platform; compose them instead.",
-    "Do not add third-party authentication providers; Internet Identity is the only supported auth mechanism if authentication is added later."
+    "Backend must remain a single-actor Motoko canister (all logic in backend/main.mo).",
+    "Do not modify files under frontend immutablePaths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Use React + TypeScript + Tailwind + React Query patterns already present in the codebase."
   ],
   "nonGoals": [
-    "Real-time updates (WebSockets or live collaboration).",
-    "Integration with external accounting platforms or external databases.",
-    "Payments processing or invoicing to reps/customers."
+    "Implementing the previously discussed Blochfield/xlangfuse architecture, canonical JSON hashing, Merkle roots, or topology invariants.",
+    "Adding third-party authentication providers beyond Internet Identity.",
+    "Adding external database/storage services.",
+    "Implementing real-time features (WebSockets, push notifications)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

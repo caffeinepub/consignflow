@@ -9,6 +9,12 @@
 import { IDL } from '@icp-sdk/core/candid';
 
 export const Timestamp = IDL.Int;
+export const Adjustment = IDL.Record({
+  'date' : Timestamp,
+  'notes' : IDL.Text,
+  'amount' : IDL.Nat64,
+  'repId' : IDL.Nat,
+});
 export const Consignment = IDL.Record({
   'date' : Timestamp,
   'productId' : IDL.Nat,
@@ -36,8 +42,34 @@ export const Sale = IDL.Record({
   'unitPrice' : IDL.Nat64,
   'repId' : IDL.Nat,
 });
+export const SettlementStatus = IDL.Variant({
+  'closed' : IDL.Null,
+  'open' : IDL.Null,
+});
+export const RepBalance = IDL.Record({
+  'consignmentValue' : IDL.Nat64,
+  'salesValue' : IDL.Nat64,
+  'finalBalance' : IDL.Nat64,
+  'returnsValue' : IDL.Nat64,
+  'adjustmentValue' : IDL.Nat64,
+  'payoutValue' : IDL.Nat64,
+});
+export const SettlementPeriodView = IDL.Record({
+  'id' : IDL.Nat,
+  'status' : SettlementStatus,
+  'endDate' : Timestamp,
+  'statementIds' : IDL.Vec(IDL.Nat),
+  'closingBalances' : IDL.Vec(IDL.Tuple(IDL.Nat, RepBalance)),
+  'openingBalances' : IDL.Vec(IDL.Tuple(IDL.Nat, RepBalance)),
+  'startDate' : Timestamp,
+});
 
 export const idlService = IDL.Service({
+  'addAdjustment' : IDL.Func(
+      [IDL.Nat, IDL.Nat64, Timestamp, IDL.Text],
+      [IDL.Nat],
+      [],
+    ),
   'addConsignment' : IDL.Func(
       [IDL.Nat, IDL.Nat, IDL.Nat, Timestamp],
       [IDL.Nat],
@@ -56,12 +88,22 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'closeSettlementPeriod' : IDL.Func([IDL.Nat], [], []),
+  'createSettlementPeriod' : IDL.Func([Timestamp, Timestamp], [IDL.Nat], []),
+  'getAdjustment' : IDL.Func([IDL.Nat], [Adjustment], ['query']),
+  'getAdjustmentsByRep' : IDL.Func([IDL.Nat], [IDL.Vec(Adjustment)], ['query']),
+  'getAllAdjustments' : IDL.Func([], [IDL.Vec(Adjustment)], ['query']),
   'getAllConsignments' : IDL.Func([], [IDL.Vec(Consignment)], ['query']),
   'getAllPayouts' : IDL.Func([], [IDL.Vec(Payout)], ['query']),
   'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
   'getAllReps' : IDL.Func([], [IDL.Vec(Rep)], ['query']),
   'getAllReturns' : IDL.Func([], [IDL.Vec(ReturnModel)], ['query']),
   'getAllSales' : IDL.Func([], [IDL.Vec(Sale)], ['query']),
+  'getAllSettlementPeriods' : IDL.Func(
+      [],
+      [IDL.Vec(SettlementPeriodView)],
+      ['query'],
+    ),
   'getConsignment' : IDL.Func([IDL.Nat], [Consignment], ['query']),
   'getConsignmentsByRep' : IDL.Func(
       [IDL.Nat],
@@ -76,12 +118,33 @@ export const idlService = IDL.Service({
   'getReturnsByRep' : IDL.Func([IDL.Nat], [IDL.Vec(ReturnModel)], ['query']),
   'getSale' : IDL.Func([IDL.Nat], [Sale], ['query']),
   'getSalesByRep' : IDL.Func([IDL.Nat], [IDL.Vec(Sale)], ['query']),
+  'getSettlementPeriod' : IDL.Func(
+      [IDL.Nat],
+      [SettlementPeriodView],
+      ['query'],
+    ),
+  'getSettlementPeriodsByStatus' : IDL.Func(
+      [SettlementStatus],
+      [IDL.Vec(SettlementPeriodView)],
+      ['query'],
+    ),
+  'getSettlementPeriodsForRep' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Vec(SettlementPeriodView)],
+      ['query'],
+    ),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
   const Timestamp = IDL.Int;
+  const Adjustment = IDL.Record({
+    'date' : Timestamp,
+    'notes' : IDL.Text,
+    'amount' : IDL.Nat64,
+    'repId' : IDL.Nat,
+  });
   const Consignment = IDL.Record({
     'date' : Timestamp,
     'productId' : IDL.Nat,
@@ -109,8 +172,34 @@ export const idlFactory = ({ IDL }) => {
     'unitPrice' : IDL.Nat64,
     'repId' : IDL.Nat,
   });
+  const SettlementStatus = IDL.Variant({
+    'closed' : IDL.Null,
+    'open' : IDL.Null,
+  });
+  const RepBalance = IDL.Record({
+    'consignmentValue' : IDL.Nat64,
+    'salesValue' : IDL.Nat64,
+    'finalBalance' : IDL.Nat64,
+    'returnsValue' : IDL.Nat64,
+    'adjustmentValue' : IDL.Nat64,
+    'payoutValue' : IDL.Nat64,
+  });
+  const SettlementPeriodView = IDL.Record({
+    'id' : IDL.Nat,
+    'status' : SettlementStatus,
+    'endDate' : Timestamp,
+    'statementIds' : IDL.Vec(IDL.Nat),
+    'closingBalances' : IDL.Vec(IDL.Tuple(IDL.Nat, RepBalance)),
+    'openingBalances' : IDL.Vec(IDL.Tuple(IDL.Nat, RepBalance)),
+    'startDate' : Timestamp,
+  });
   
   return IDL.Service({
+    'addAdjustment' : IDL.Func(
+        [IDL.Nat, IDL.Nat64, Timestamp, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
     'addConsignment' : IDL.Func(
         [IDL.Nat, IDL.Nat, IDL.Nat, Timestamp],
         [IDL.Nat],
@@ -133,12 +222,26 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'closeSettlementPeriod' : IDL.Func([IDL.Nat], [], []),
+    'createSettlementPeriod' : IDL.Func([Timestamp, Timestamp], [IDL.Nat], []),
+    'getAdjustment' : IDL.Func([IDL.Nat], [Adjustment], ['query']),
+    'getAdjustmentsByRep' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(Adjustment)],
+        ['query'],
+      ),
+    'getAllAdjustments' : IDL.Func([], [IDL.Vec(Adjustment)], ['query']),
     'getAllConsignments' : IDL.Func([], [IDL.Vec(Consignment)], ['query']),
     'getAllPayouts' : IDL.Func([], [IDL.Vec(Payout)], ['query']),
     'getAllProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'getAllReps' : IDL.Func([], [IDL.Vec(Rep)], ['query']),
     'getAllReturns' : IDL.Func([], [IDL.Vec(ReturnModel)], ['query']),
     'getAllSales' : IDL.Func([], [IDL.Vec(Sale)], ['query']),
+    'getAllSettlementPeriods' : IDL.Func(
+        [],
+        [IDL.Vec(SettlementPeriodView)],
+        ['query'],
+      ),
     'getConsignment' : IDL.Func([IDL.Nat], [Consignment], ['query']),
     'getConsignmentsByRep' : IDL.Func(
         [IDL.Nat],
@@ -153,6 +256,21 @@ export const idlFactory = ({ IDL }) => {
     'getReturnsByRep' : IDL.Func([IDL.Nat], [IDL.Vec(ReturnModel)], ['query']),
     'getSale' : IDL.Func([IDL.Nat], [Sale], ['query']),
     'getSalesByRep' : IDL.Func([IDL.Nat], [IDL.Vec(Sale)], ['query']),
+    'getSettlementPeriod' : IDL.Func(
+        [IDL.Nat],
+        [SettlementPeriodView],
+        ['query'],
+      ),
+    'getSettlementPeriodsByStatus' : IDL.Func(
+        [SettlementStatus],
+        [IDL.Vec(SettlementPeriodView)],
+        ['query'],
+      ),
+    'getSettlementPeriodsForRep' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(SettlementPeriodView)],
+        ['query'],
+      ),
   });
 };
 

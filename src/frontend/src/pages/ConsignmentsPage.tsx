@@ -5,12 +5,15 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Download } from 'lucide-react';
-import { useConsignments, useAddConsignment, useReps, useProducts } from '@/hooks/useQueries';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Download, AlertCircle } from 'lucide-react';
+import { useConsignments, useAddConsignment, useReps, useProducts, useClosedSettlementPeriods } from '@/hooks/useQueries';
 import { generateCSV, downloadCSV, formatDate } from '@/lib/csv';
 import RepSelect from '@/components/RepSelect';
 import LineItemsEditor, { type LineItem } from '@/components/LineItemsEditor';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import { checkSettlementLock } from '@/lib/settlementLock';
+import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 export default function ConsignmentsPage() {
@@ -24,7 +27,10 @@ export default function ConsignmentsPage() {
   const { data: consignments = [], isLoading } = useConsignments();
   const { data: reps = [] } = useReps();
   const { data: products = [] } = useProducts();
+  const { data: closedPeriods = [] } = useClosedSettlementPeriods();
   const addConsignment = useAddConsignment();
+
+  const lockCheck = checkSettlementLock(new Date(date), closedPeriods);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +42,11 @@ export default function ConsignmentsPage() {
 
     if (items.length === 0 || items.some((item) => !item.productId || !item.quantity)) {
       toast.error('Please add at least one complete line item');
+      return;
+    }
+
+    if (lockCheck.isLocked) {
+      toast.error('Cannot add consignment in closed settlement period');
       return;
     }
 
@@ -56,8 +67,9 @@ export default function ConsignmentsPage() {
       setDate(new Date().toISOString().split('T')[0]);
       setItems([{ productId: '', quantity: '1' }]);
       setIsDialogOpen(false);
-    } catch (error) {
-      toast.error('Failed to add consignment');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to add consignment';
+      toast.error(errorMessage);
       console.error(error);
     }
   };
@@ -122,12 +134,23 @@ export default function ConsignmentsPage() {
                     <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                   </div>
                 </div>
+                {lockCheck.isLocked && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {lockCheck.message}{' '}
+                      <Link to="/adjustments" className="font-medium underline">
+                        Go to Adjustments
+                      </Link>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <LineItemsEditor items={items} onChange={setItems} />
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={addConsignment.isPending}>
+                  <Button type="submit" disabled={addConsignment.isPending || lockCheck.isLocked}>
                     {addConsignment.isPending ? 'Adding...' : 'Add Consignment'}
                   </Button>
                 </div>

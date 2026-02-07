@@ -20,8 +20,31 @@ export interface Consignment {
     quantity: bigint;
     repId: bigint;
 }
+export interface RepBalance {
+    consignmentValue: bigint;
+    salesValue: bigint;
+    finalBalance: bigint;
+    returnsValue: bigint;
+    adjustmentValue: bigint;
+    payoutValue: bigint;
+}
 export interface Rep {
     name: string;
+}
+export interface SettlementPeriodView {
+    id: bigint;
+    status: SettlementStatus;
+    endDate: Timestamp;
+    statementIds: Array<bigint>;
+    closingBalances: Array<[bigint, RepBalance]>;
+    openingBalances: Array<[bigint, RepBalance]>;
+    startDate: Timestamp;
+}
+export interface Adjustment {
+    date: Timestamp;
+    notes: string;
+    amount: bigint;
+    repId: bigint;
 }
 export interface Sale {
     date: Timestamp;
@@ -40,19 +63,30 @@ export interface Product {
     name: string;
     price: bigint;
 }
+export enum SettlementStatus {
+    closed = "closed",
+    open = "open"
+}
 export interface backendInterface {
+    addAdjustment(repId: bigint, amount: bigint, date: Timestamp, notes: string): Promise<bigint>;
     addConsignment(repId: bigint, productId: bigint, quantity: bigint, date: Timestamp): Promise<bigint>;
     addPayout(repId: bigint, amount: bigint, date: Timestamp, notes: string): Promise<bigint>;
     addProduct(name: string, price: bigint): Promise<bigint>;
     addRep(name: string): Promise<bigint>;
     addReturn(repId: bigint, productId: bigint, quantity: bigint, date: Timestamp): Promise<bigint>;
     addSale(repId: bigint, productId: bigint, quantity: bigint, unitPrice: bigint, date: Timestamp): Promise<bigint>;
+    closeSettlementPeriod(settlementId: bigint): Promise<void>;
+    createSettlementPeriod(startDate: Timestamp, endDate: Timestamp): Promise<bigint>;
+    getAdjustment(id: bigint): Promise<Adjustment>;
+    getAdjustmentsByRep(repId: bigint): Promise<Array<Adjustment>>;
+    getAllAdjustments(): Promise<Array<Adjustment>>;
     getAllConsignments(): Promise<Array<Consignment>>;
     getAllPayouts(): Promise<Array<Payout>>;
     getAllProducts(): Promise<Array<Product>>;
     getAllReps(): Promise<Array<Rep>>;
     getAllReturns(): Promise<Array<ReturnModel>>;
     getAllSales(): Promise<Array<Sale>>;
+    getAllSettlementPeriods(): Promise<Array<SettlementPeriodView>>;
     getConsignment(id: bigint): Promise<Consignment>;
     getConsignmentsByRep(repId: bigint): Promise<Array<Consignment>>;
     getPayout(id: bigint): Promise<Payout>;
@@ -63,4 +97,7 @@ export interface backendInterface {
     getReturnsByRep(repId: bigint): Promise<Array<ReturnModel>>;
     getSale(id: bigint): Promise<Sale>;
     getSalesByRep(repId: bigint): Promise<Array<Sale>>;
+    getSettlementPeriod(id: bigint): Promise<SettlementPeriodView>;
+    getSettlementPeriodsByStatus(status: SettlementStatus): Promise<Array<SettlementPeriodView>>;
+    getSettlementPeriodsForRep(repId: bigint): Promise<Array<SettlementPeriodView>>;
 }

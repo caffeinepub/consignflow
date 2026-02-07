@@ -102,8 +102,31 @@ export interface Consignment {
     quantity: bigint;
     repId: bigint;
 }
+export interface RepBalance {
+    consignmentValue: bigint;
+    salesValue: bigint;
+    finalBalance: bigint;
+    returnsValue: bigint;
+    adjustmentValue: bigint;
+    payoutValue: bigint;
+}
 export interface Rep {
     name: string;
+}
+export interface SettlementPeriodView {
+    id: bigint;
+    status: SettlementStatus;
+    endDate: Timestamp;
+    statementIds: Array<bigint>;
+    closingBalances: Array<[bigint, RepBalance]>;
+    openingBalances: Array<[bigint, RepBalance]>;
+    startDate: Timestamp;
+}
+export interface Adjustment {
+    date: Timestamp;
+    notes: string;
+    amount: bigint;
+    repId: bigint;
 }
 export interface Sale {
     date: Timestamp;
@@ -122,19 +145,30 @@ export interface Product {
     name: string;
     price: bigint;
 }
+export enum SettlementStatus {
+    closed = "closed",
+    open = "open"
+}
 export interface backendInterface {
+    addAdjustment(repId: bigint, amount: bigint, date: Timestamp, notes: string): Promise<bigint>;
     addConsignment(repId: bigint, productId: bigint, quantity: bigint, date: Timestamp): Promise<bigint>;
     addPayout(repId: bigint, amount: bigint, date: Timestamp, notes: string): Promise<bigint>;
     addProduct(name: string, price: bigint): Promise<bigint>;
     addRep(name: string): Promise<bigint>;
     addReturn(repId: bigint, productId: bigint, quantity: bigint, date: Timestamp): Promise<bigint>;
     addSale(repId: bigint, productId: bigint, quantity: bigint, unitPrice: bigint, date: Timestamp): Promise<bigint>;
+    closeSettlementPeriod(settlementId: bigint): Promise<void>;
+    createSettlementPeriod(startDate: Timestamp, endDate: Timestamp): Promise<bigint>;
+    getAdjustment(id: bigint): Promise<Adjustment>;
+    getAdjustmentsByRep(repId: bigint): Promise<Array<Adjustment>>;
+    getAllAdjustments(): Promise<Array<Adjustment>>;
     getAllConsignments(): Promise<Array<Consignment>>;
     getAllPayouts(): Promise<Array<Payout>>;
     getAllProducts(): Promise<Array<Product>>;
     getAllReps(): Promise<Array<Rep>>;
     getAllReturns(): Promise<Array<ReturnModel>>;
     getAllSales(): Promise<Array<Sale>>;
+    getAllSettlementPeriods(): Promise<Array<SettlementPeriodView>>;
     getConsignment(id: bigint): Promise<Consignment>;
     getConsignmentsByRep(repId: bigint): Promise<Array<Consignment>>;
     getPayout(id: bigint): Promise<Payout>;
@@ -145,9 +179,27 @@ export interface backendInterface {
     getReturnsByRep(repId: bigint): Promise<Array<ReturnModel>>;
     getSale(id: bigint): Promise<Sale>;
     getSalesByRep(repId: bigint): Promise<Array<Sale>>;
+    getSettlementPeriod(id: bigint): Promise<SettlementPeriodView>;
+    getSettlementPeriodsByStatus(status: SettlementStatus): Promise<Array<SettlementPeriodView>>;
+    getSettlementPeriodsForRep(repId: bigint): Promise<Array<SettlementPeriodView>>;
 }
+import type { RepBalance as _RepBalance, SettlementPeriodView as _SettlementPeriodView, SettlementStatus as _SettlementStatus, Timestamp as _Timestamp } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async addAdjustment(arg0: bigint, arg1: bigint, arg2: Timestamp, arg3: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addAdjustment(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addAdjustment(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
     async addConsignment(arg0: bigint, arg1: bigint, arg2: bigint, arg3: Timestamp): Promise<bigint> {
         if (this.processError) {
             try {
@@ -229,6 +281,76 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.addSale(arg0, arg1, arg2, arg3, arg4);
+            return result;
+        }
+    }
+    async closeSettlementPeriod(arg0: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.closeSettlementPeriod(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.closeSettlementPeriod(arg0);
+            return result;
+        }
+    }
+    async createSettlementPeriod(arg0: Timestamp, arg1: Timestamp): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createSettlementPeriod(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createSettlementPeriod(arg0, arg1);
+            return result;
+        }
+    }
+    async getAdjustment(arg0: bigint): Promise<Adjustment> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAdjustment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAdjustment(arg0);
+            return result;
+        }
+    }
+    async getAdjustmentsByRep(arg0: bigint): Promise<Array<Adjustment>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAdjustmentsByRep(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAdjustmentsByRep(arg0);
+            return result;
+        }
+    }
+    async getAllAdjustments(): Promise<Array<Adjustment>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllAdjustments();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllAdjustments();
             return result;
         }
     }
@@ -314,6 +436,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAllSales();
             return result;
+        }
+    }
+    async getAllSettlementPeriods(): Promise<Array<SettlementPeriodView>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllSettlementPeriods();
+                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllSettlementPeriods();
+            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
         }
     }
     async getConsignment(arg0: bigint): Promise<Consignment> {
@@ -456,6 +592,105 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getSettlementPeriod(arg0: bigint): Promise<SettlementPeriodView> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSettlementPeriod(arg0);
+                return from_candid_SettlementPeriodView_n2(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSettlementPeriod(arg0);
+            return from_candid_SettlementPeriodView_n2(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getSettlementPeriodsByStatus(arg0: SettlementStatus): Promise<Array<SettlementPeriodView>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSettlementPeriodsByStatus(to_candid_SettlementStatus_n6(this._uploadFile, this._downloadFile, arg0));
+                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSettlementPeriodsByStatus(to_candid_SettlementStatus_n6(this._uploadFile, this._downloadFile, arg0));
+            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getSettlementPeriodsForRep(arg0: bigint): Promise<Array<SettlementPeriodView>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSettlementPeriodsForRep(arg0);
+                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSettlementPeriodsForRep(arg0);
+            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
+}
+function from_candid_SettlementPeriodView_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SettlementPeriodView): SettlementPeriodView {
+    return from_candid_record_n3(_uploadFile, _downloadFile, value);
+}
+function from_candid_SettlementStatus_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SettlementStatus): SettlementStatus {
+    return from_candid_variant_n5(_uploadFile, _downloadFile, value);
+}
+function from_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    id: bigint;
+    status: _SettlementStatus;
+    endDate: _Timestamp;
+    statementIds: Array<bigint>;
+    closingBalances: Array<[bigint, _RepBalance]>;
+    openingBalances: Array<[bigint, _RepBalance]>;
+    startDate: _Timestamp;
+}): {
+    id: bigint;
+    status: SettlementStatus;
+    endDate: Timestamp;
+    statementIds: Array<bigint>;
+    closingBalances: Array<[bigint, RepBalance]>;
+    openingBalances: Array<[bigint, RepBalance]>;
+    startDate: Timestamp;
+} {
+    return {
+        id: value.id,
+        status: from_candid_SettlementStatus_n4(_uploadFile, _downloadFile, value.status),
+        endDate: value.endDate,
+        statementIds: value.statementIds,
+        closingBalances: value.closingBalances,
+        openingBalances: value.openingBalances,
+        startDate: value.startDate
+    };
+}
+function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    closed: null;
+} | {
+    open: null;
+}): SettlementStatus {
+    return "closed" in value ? SettlementStatus.closed : "open" in value ? SettlementStatus.open : value;
+}
+function from_candid_vec_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_SettlementPeriodView>): Array<SettlementPeriodView> {
+    return value.map((x)=>from_candid_SettlementPeriodView_n2(_uploadFile, _downloadFile, x));
+}
+function to_candid_SettlementStatus_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SettlementStatus): _SettlementStatus {
+    return to_candid_variant_n7(_uploadFile, _downloadFile, value);
+}
+function to_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SettlementStatus): {
+    closed: null;
+} | {
+    open: null;
+} {
+    return value == SettlementStatus.closed ? {
+        closed: null
+    } : value == SettlementStatus.open ? {
+        open: null
+    } : value;
 }
 export interface CreateActorOptions {
     agent?: Agent;

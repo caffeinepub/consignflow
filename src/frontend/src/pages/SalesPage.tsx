@@ -5,12 +5,15 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Download } from 'lucide-react';
-import { useSales, useAddSale, useReps, useProducts } from '@/hooks/useQueries';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Download, AlertCircle } from 'lucide-react';
+import { useSales, useAddSale, useReps, useProducts, useClosedSettlementPeriods } from '@/hooks/useQueries';
 import { generateCSV, downloadCSV, formatDate, formatCurrency } from '@/lib/csv';
 import RepSelect from '@/components/RepSelect';
 import LineItemsEditor, { type LineItem } from '@/components/LineItemsEditor';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import { checkSettlementLock } from '@/lib/settlementLock';
+import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 export default function SalesPage() {
@@ -24,7 +27,10 @@ export default function SalesPage() {
   const { data: sales = [], isLoading } = useSales();
   const { data: reps = [] } = useReps();
   const { data: products = [] } = useProducts();
+  const { data: closedPeriods = [] } = useClosedSettlementPeriods();
   const addSale = useAddSale();
+
+  const lockCheck = checkSettlementLock(new Date(date), closedPeriods);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +42,11 @@ export default function SalesPage() {
 
     if (items.length === 0 || items.some((item) => !item.productId || !item.quantity || !item.unitPrice)) {
       toast.error('Please add at least one complete line item');
+      return;
+    }
+
+    if (lockCheck.isLocked) {
+      toast.error('Cannot add sale in closed settlement period');
       return;
     }
 
@@ -57,8 +68,9 @@ export default function SalesPage() {
       setDate(new Date().toISOString().split('T')[0]);
       setItems([{ productId: '', quantity: '1', unitPrice: '' }]);
       setIsDialogOpen(false);
-    } catch (error) {
-      toast.error('Failed to add sale');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to add sale';
+      toast.error(errorMessage);
       console.error(error);
     }
   };
@@ -125,12 +137,23 @@ export default function SalesPage() {
                     <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                   </div>
                 </div>
+                {lockCheck.isLocked && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {lockCheck.message}{' '}
+                      <Link to="/adjustments" className="font-medium underline">
+                        Go to Adjustments
+                      </Link>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <LineItemsEditor items={items} onChange={setItems} showUnitPrice />
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={addSale.isPending}>
+                  <Button type="submit" disabled={addSale.isPending || lockCheck.isLocked}>
                     {addSale.isPending ? 'Adding...' : 'Add Sale'}
                   </Button>
                 </div>

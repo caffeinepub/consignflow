@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Product, Rep, Consignment, Sale, ReturnModel, Payout } from '../backend';
+import { SettlementStatus } from '../backend';
+import type { Product, Rep, Consignment, Sale, ReturnModel, Payout, SettlementPeriodView, Adjustment } from '../backend';
 
 // Products
 export function useProducts() {
@@ -160,6 +161,87 @@ export function useAddPayout() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payouts'] });
+    },
+  });
+}
+
+// Settlement Periods
+export function useSettlementPeriods() {
+  const { actor, isFetching } = useActor();
+  return useQuery<SettlementPeriodView[]>({
+    queryKey: ['settlementPeriods'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllSettlementPeriods();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useClosedSettlementPeriods() {
+  const { actor, isFetching } = useActor();
+  return useQuery<SettlementPeriodView[]>({
+    queryKey: ['settlementPeriods', 'closed'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getSettlementPeriodsByStatus(SettlementStatus.closed);
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateSettlementPeriod() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ startDate, endDate }: { startDate: bigint; endDate: bigint }) => {
+      if (!actor) throw new Error('Actor not initialized');
+      return actor.createSettlementPeriod(startDate, endDate);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settlementPeriods'] });
+    },
+  });
+}
+
+export function useCloseSettlementPeriod() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (settlementId: bigint) => {
+      if (!actor) throw new Error('Actor not initialized');
+      return actor.closeSettlementPeriod(settlementId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settlementPeriods'] });
+    },
+  });
+}
+
+// Adjustments
+export function useAdjustments() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Adjustment[]>({
+    queryKey: ['adjustments'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllAdjustments();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useAddAdjustment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ repId, amount, date, notes }: { repId: bigint; amount: bigint; date: bigint; notes: string }) => {
+      if (!actor) throw new Error('Actor not initialized');
+      return actor.addAdjustment(repId, amount, date, notes);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adjustments'] });
+      queryClient.invalidateQueries({ queryKey: ['settlementPeriods'] });
     },
   });
 }

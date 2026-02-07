@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, Package, Users, TrendingUp, TrendingDown, DollarSign, FileText, ArrowLeftRight } from 'lucide-react';
+import { LayoutDashboard, Package, Users, TrendingUp, TrendingDown, DollarSign, FileText, ArrowLeftRight, Calendar, Edit3 } from 'lucide-react';
 import { SiCoffeescript } from 'react-icons/si';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,8 @@ const navigation = [
   { name: 'Returns', href: '/returns', icon: TrendingDown },
   { name: 'Payouts', href: '/payouts', icon: DollarSign },
   { name: 'Statements', href: '/statements', icon: FileText },
+  { name: 'Settlement Periods', href: '/settlement-periods', icon: Calendar },
+  { name: 'Adjustments', href: '/adjustments', icon: Edit3 },
 ];
 
 export default function AppLayout({ children }: AppLayoutProps) {

@@ -6,11 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Download } from 'lucide-react';
-import { usePayouts, useAddPayout, useReps } from '@/hooks/useQueries';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Plus, Download, AlertCircle } from 'lucide-react';
+import { usePayouts, useAddPayout, useReps, useClosedSettlementPeriods } from '@/hooks/useQueries';
 import { generateCSV, downloadCSV, formatDate, formatCurrency } from '@/lib/csv';
 import RepSelect from '@/components/RepSelect';
 import DateRangeFilter from '@/components/DateRangeFilter';
+import { checkSettlementLock } from '@/lib/settlementLock';
+import { Link } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 export default function PayoutsPage() {
@@ -24,7 +27,10 @@ export default function PayoutsPage() {
 
   const { data: payouts = [], isLoading } = usePayouts();
   const { data: reps = [] } = useReps();
+  const { data: closedPeriods = [] } = useClosedSettlementPeriods();
   const addPayout = useAddPayout();
+
+  const lockCheck = checkSettlementLock(new Date(date), closedPeriods);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +43,11 @@ export default function PayoutsPage() {
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue < 0) {
       toast.error('Please enter a valid amount');
+      return;
+    }
+
+    if (lockCheck.isLocked) {
+      toast.error('Cannot add payout in closed settlement period');
       return;
     }
 
@@ -54,8 +65,9 @@ export default function PayoutsPage() {
       setDate(new Date().toISOString().split('T')[0]);
       setNotes('');
       setIsDialogOpen(false);
-    } catch (error) {
-      toast.error('Failed to add payout');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to add payout';
+      toast.error(errorMessage);
       console.error(error);
     }
   };
@@ -132,6 +144,17 @@ export default function PayoutsPage() {
                     <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                   </div>
                 </div>
+                {lockCheck.isLocked && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {lockCheck.message}{' '}
+                      <Link to="/adjustments" className="font-medium underline">
+                        Go to Adjustments
+                      </Link>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -146,7 +169,7 @@ export default function PayoutsPage() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={addPayout.isPending}>
+                  <Button type="submit" disabled={addPayout.isPending || lockCheck.isLocked}>
                     {addPayout.isPending ? 'Adding...' : 'Add Payout'}
                   </Button>
                 </div>

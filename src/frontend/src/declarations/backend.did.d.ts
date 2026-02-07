@@ -10,6 +10,12 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Adjustment {
+  'date' : Timestamp,
+  'notes' : string,
+  'amount' : bigint,
+  'repId' : bigint,
+}
 export interface Consignment {
   'date' : Timestamp,
   'productId' : bigint,
@@ -24,6 +30,14 @@ export interface Payout {
 }
 export interface Product { 'name' : string, 'price' : bigint }
 export interface Rep { 'name' : string }
+export interface RepBalance {
+  'consignmentValue' : bigint,
+  'salesValue' : bigint,
+  'finalBalance' : bigint,
+  'returnsValue' : bigint,
+  'adjustmentValue' : bigint,
+  'payoutValue' : bigint,
+}
 export interface ReturnModel {
   'date' : Timestamp,
   'productId' : bigint,
@@ -37,20 +51,38 @@ export interface Sale {
   'unitPrice' : bigint,
   'repId' : bigint,
 }
+export interface SettlementPeriodView {
+  'id' : bigint,
+  'status' : SettlementStatus,
+  'endDate' : Timestamp,
+  'statementIds' : Array<bigint>,
+  'closingBalances' : Array<[bigint, RepBalance]>,
+  'openingBalances' : Array<[bigint, RepBalance]>,
+  'startDate' : Timestamp,
+}
+export type SettlementStatus = { 'closed' : null } |
+  { 'open' : null };
 export type Timestamp = bigint;
 export interface _SERVICE {
+  'addAdjustment' : ActorMethod<[bigint, bigint, Timestamp, string], bigint>,
   'addConsignment' : ActorMethod<[bigint, bigint, bigint, Timestamp], bigint>,
   'addPayout' : ActorMethod<[bigint, bigint, Timestamp, string], bigint>,
   'addProduct' : ActorMethod<[string, bigint], bigint>,
   'addRep' : ActorMethod<[string], bigint>,
   'addReturn' : ActorMethod<[bigint, bigint, bigint, Timestamp], bigint>,
   'addSale' : ActorMethod<[bigint, bigint, bigint, bigint, Timestamp], bigint>,
+  'closeSettlementPeriod' : ActorMethod<[bigint], undefined>,
+  'createSettlementPeriod' : ActorMethod<[Timestamp, Timestamp], bigint>,
+  'getAdjustment' : ActorMethod<[bigint], Adjustment>,
+  'getAdjustmentsByRep' : ActorMethod<[bigint], Array<Adjustment>>,
+  'getAllAdjustments' : ActorMethod<[], Array<Adjustment>>,
   'getAllConsignments' : ActorMethod<[], Array<Consignment>>,
   'getAllPayouts' : ActorMethod<[], Array<Payout>>,
   'getAllProducts' : ActorMethod<[], Array<Product>>,
   'getAllReps' : ActorMethod<[], Array<Rep>>,
   'getAllReturns' : ActorMethod<[], Array<ReturnModel>>,
   'getAllSales' : ActorMethod<[], Array<Sale>>,
+  'getAllSettlementPeriods' : ActorMethod<[], Array<SettlementPeriodView>>,
   'getConsignment' : ActorMethod<[bigint], Consignment>,
   'getConsignmentsByRep' : ActorMethod<[bigint], Array<Consignment>>,
   'getPayout' : ActorMethod<[bigint], Payout>,
@@ -61,6 +93,15 @@ export interface _SERVICE {
   'getReturnsByRep' : ActorMethod<[bigint], Array<ReturnModel>>,
   'getSale' : ActorMethod<[bigint], Sale>,
   'getSalesByRep' : ActorMethod<[bigint], Array<Sale>>,
+  'getSettlementPeriod' : ActorMethod<[bigint], SettlementPeriodView>,
+  'getSettlementPeriodsByStatus' : ActorMethod<
+    [SettlementStatus],
+    Array<SettlementPeriodView>
+  >,
+  'getSettlementPeriodsForRep' : ActorMethod<
+    [bigint],
+    Array<SettlementPeriodView>
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

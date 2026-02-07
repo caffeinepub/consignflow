@@ -9,6 +9,7 @@ import { useReps, useProducts, useSales, useReturns, usePayouts } from '@/hooks/
 import { calculateRepBalances } from '@/lib/calculations';
 import { getMonthStart, getMonthEnd, formatMonthYear, getCurrentMonth } from '@/lib/dateUtils';
 import { formatDate, formatCurrency } from '@/lib/csv';
+import { getCommissionSettings } from '@/lib/commissionSettings';
 
 export default function StatementsPage() {
   const currentMonth = getCurrentMonth();
@@ -32,6 +33,9 @@ export default function StatementsPage() {
 
   const balances = calculateRepBalances(reps, sales, returns, payouts, products, startDate, endDate);
   const repBalance = repIndex >= 0 ? balances[repIndex] : null;
+
+  const settings = getCommissionSettings();
+  const commissionRate = repIndex >= 0 ? (settings.repOverrides[repIndex] ?? settings.defaultCommission) : 0;
 
   const repSales = sales.filter((s) => {
     const saleDate = new Date(Number(s.date) / 1_000_000);
@@ -183,22 +187,16 @@ export default function StatementsPage() {
                         <TableHead>Date</TableHead>
                         <TableHead>Product</TableHead>
                         <TableHead className="text-right">Qty</TableHead>
-                        <TableHead className="text-right">Value</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {repReturns.map((ret, index) => {
-                        const product = products[Number(ret.productId)];
-                        const value = product ? Number(product.price) * Number(ret.quantity) : 0;
-                        return (
-                          <TableRow key={index}>
-                            <TableCell>{formatDate(ret.date)}</TableCell>
-                            <TableCell>{product?.name || 'Unknown'}</TableCell>
-                            <TableCell className="text-right">{Number(ret.quantity)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(value)}</TableCell>
-                          </TableRow>
-                        );
-                      })}
+                      {repReturns.map((returnItem, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{formatDate(returnItem.date)}</TableCell>
+                          <TableCell>{products[Number(returnItem.productId)]?.name || 'Unknown'}</TableCell>
+                          <TableCell className="text-right">{Number(returnItem.quantity)}</TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 )}
@@ -213,16 +211,16 @@ export default function StatementsPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Date</TableHead>
-                        <TableHead>Notes</TableHead>
                         <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>Notes</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {repPayouts.map((payout, index) => (
                         <TableRow key={index}>
                           <TableCell>{formatDate(payout.date)}</TableCell>
-                          <TableCell>{payout.notes || '—'}</TableCell>
                           <TableCell className="text-right">{formatCurrency(Number(payout.amount))}</TableCell>
+                          <TableCell className="text-muted-foreground">{payout.notes || '—'}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -242,7 +240,11 @@ export default function StatementsPage() {
                     <span className="font-medium">{formatCurrency(repBalance.totalReturns)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Commission Earned:</span>
+                    <span>Net Sales:</span>
+                    <span className="font-medium">{formatCurrency(repBalance.totalSales - repBalance.totalReturns)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Commission ({commissionRate}%):</span>
                     <span className="font-medium">{formatCurrency(repBalance.commission)}</span>
                   </div>
                   <div className="flex justify-between">
@@ -250,7 +252,7 @@ export default function StatementsPage() {
                     <span className="font-medium">{formatCurrency(repBalance.totalPayouts)}</span>
                   </div>
                   <div className="flex justify-between border-t pt-2 text-lg font-bold">
-                    <span>Amount Owed:</span>
+                    <span>Balance Due:</span>
                     <span>{formatCurrency(repBalance.amountOwed)}</span>
                   </div>
                 </div>
@@ -258,14 +260,6 @@ export default function StatementsPage() {
             </CardContent>
           </Card>
         </div>
-      )}
-
-      {!selectedRep && (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            Select a rep and month above to generate a statement
-          </CardContent>
-        </Card>
       )}
     </div>
   );

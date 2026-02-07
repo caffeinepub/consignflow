@@ -1,15 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Build ConsignFlow, a web app to track consignment operations (products, reps, consignments, sales, returns, payouts) with dashboards, CSV exports, and printable monthly statements.
+**Goal:** Add settlement periods with close/lock rules, adjustments, and balance carry-forward, and integrate these into statement generation and navigation.
 
 **Planned changes:**
-- Implement backend data models and persistent storage for Products, Reps, Consignments (with line items), Sales (with line items and unit price), Returns (with line items), and Payouts.
-- Expose backend CRUD APIs for all entities, including list/filter by rep and date range, with user-friendly validation errors.
-- Build frontend CRUD screens for each entity (list, detail, create/edit), including multi-line-item entry for consignments/sales/returns and basic filtering/search.
-- Add dashboard views and calculations for amount owed by rep, inventory by rep, and profit/commission using configurable commission rules (default % with per-rep overrides).
-- Add CSV export actions for each entity and for key reports (owed-by-rep, inventory-by-rep), including date-range exporting and line-item row format.
-- Generate print-friendly monthly statements per rep with itemized sales/returns/payouts, summary totals, and a browser print/PDF-ready layout.
-- Apply a consistent visual theme across the app and print views, avoiding blue/purple as primary brand colors.
+- Add backend SettlementPeriod data model and APIs to create/list/get/close periods, enforce non-overlapping date ranges, store statement link(s), and keep closed periods immutable.
+- Add backend Adjustment data model and APIs to create/list adjustments, and enforce locking rules that block consignments/sales/returns/payouts dated inside closed periods while allowing adjustments.
+- Implement settlement close accounting in the backend: compute/store per-rep opening and closing balances for a period and carry forward closing balances to the next period’s opening balances.
+- Add a frontend Settlement Periods management page to create, view, and close periods and to navigate to statements linked to a period.
+- Update statements UI to support generating/viewing statements by settlement period (in addition to existing monthly flow), display opening/closing balances, and persist/link generated statements to the settlement period.
+- Enforce settlement locking in the frontend for create/edit flows (consignments, sales, returns, payouts) with clear English messaging and a path to create an adjustment.
+- Add a frontend Adjustments UI to create and list adjustments, including adjustments dated within closed settlement periods.
 
-**User-visible outcome:** Users can manage all consignment records, view owed/inventory/commission dashboards, export data and reports as CSV, and generate clean printable monthly statements per rep.
+**User-visible outcome:** Users can manage settlement periods, close them to lock normal transactions within the date range, record adjustments inside closed periods, generate statements for a settlement period showing opening/closing balances, and revisit linked statements from the settlement period view.
