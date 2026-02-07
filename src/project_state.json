@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "ConsignFlow: a web app for managing consignment sales teams, tracking products, reps, consignments, sales, returns, and payouts, with dashboards, CSV export, and printable monthly statements.",
+  "architectural_notes": [
+    "Consignments, sales, and returns are itemized (line items with product, quantity, and transaction date) and associated to a rep.",
+    "Dashboards must compute balances owed per rep and inventory by rep; profit/commission derived via configurable rules."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-build-frontend-screens-for-managing-core-entities-with-basic-workflows-products-reps-consignments-sales-returns-and-payouts-create-edit-forms-list-views-and-record-detail-views",
+      "title": "Build frontend screens for managing core entities with basic workflows: Products, Reps, Consignments, Sales, Returns, and Payouts (create/edit forms, list views, and record detail views).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-dashboard-calculations-and-views-1-amount-owed-to-each-rep-2-inventory-by-rep-and-3-profit-commission-calculations-based-on-configurable-commission-rules",
+      "title": "Implement dashboard calculations and views: (1) amount owed to each rep, (2) inventory by rep, and (3) profit/commission calculations based on configurable commission rules.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-printable-monthly-statements-per-rep-that-include-sales-returns-payouts-starting-balance-if-supported-ending-balance-amount-owed-and-summary-totals-for-the-selected-month-provide-a-print-friendly-layout-and-a-pdf-ready-browser-print-flow",
+      "title": "Generate printable monthly statements per rep that include: sales, returns, payouts, starting balance (if supported), ending balance/amount owed, and summary totals for the selected month; provide a print-friendly layout and a PDF-ready browser print flow.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-define-and-apply-a-coherent-visual-theme-for-consignflow-colors-typography-spacing-and-component-styling-that-is-consistent-across-dashboard-forms-tables-and-print-views-avoid-blue-purple-as-primary-brand-colors",
+      "title": "Define and apply a coherent visual theme for ConsignFlow (colors, typography, spacing, and component styling) that is consistent across dashboard, forms, tables, and print views; avoid blue/purple as primary brand colors.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create core data model and CRUD for Products, Reps, Consignments (rep + items + qty + date), Sales (rep + items + qty + price), Returns, and Payouts",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Build dashboard views: amount owed to each rep, inventory by rep, and profit/commission calculations based on rules",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add CSV export for core entities and reports",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Generate printable monthly statements for reps (including sales, returns, payouts, and balances)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Implement backend data models and persistent storage for: Products, Reps, Consignments (rep + line items with product + quantity + date), Sales (rep + line items with product + quantity + unit price + date), Returns (rep + line items with product + quantity + date), and Payouts (rep + amount + date + notes/reference).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Expose backend CRUD APIs for all core entities (Products, Reps, Consignments, Sales, Returns, Payouts), including list/filter endpoints needed by the dashboard and statements (at minimum: filter by rep and date range).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Add CSV export for core entities and key reports, including exports for: Products, Reps, Consignments, Sales, Returns, Payouts, and dashboard report exports (owed-by-rep and inventory-by-rep).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "ConsignFlow",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

@@ -1,0 +1,80 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-build-frontend-screens-for-managing-core-entities-with-basic-workflows-products-reps-consignments-sales-returns-and-payouts-create-edit-forms-list-views-and-record-detail-views",
+      "featureTitle": "Build frontend screens for managing core entities with basic workflows: Products, Reps, Consignments, Sales, Returns, and Payouts (create/edit forms, list views, and record detail views).",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-dashboard-calculations-and-views-1-amount-owed-to-each-rep-2-inventory-by-rep-and-3-profit-commission-calculations-based-on-configurable-commission-rules",
+      "featureTitle": "Implement dashboard calculations and views: (1) amount owed to each rep, (2) inventory by rep, and (3) profit/commission calculations based on configurable commission rules.",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-printable-monthly-statements-per-rep-that-include-sales-returns-payouts-starting-balance-if-supported-ending-balance-amount-owed-and-summary-totals-for-the-selected-month-provide-a-print-friendly-layout-and-a-pdf-ready-browser-print-flow",
+      "featureTitle": "Generate printable monthly statements per rep that include: sales, returns, payouts, starting balance (if supported), ending balance/amount owed, and summary totals for the selected month; provide a print-friendly layout and a PDF-ready browser print flow.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-define-and-apply-a-coherent-visual-theme-for-consignflow-colors-typography-spacing-and-component-styling-that-is-consistent-across-dashboard-forms-tables-and-print-views-avoid-blue-purple-as-primary-brand-colors",
+      "featureTitle": "Define and apply a coherent visual theme for ConsignFlow (colors, typography, spacing, and component styling) that is consistent across dashboard, forms, tables, and print views; avoid blue/purple as primary brand colors.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

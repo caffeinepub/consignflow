@@ -1,0 +1,149 @@
+{
+  "kind": "build_request",
+  "title": "ConsignFlow: Consignment sales tracking with dashboards, CSV export, and printable monthly statements",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement backend data models and persistent storage for: Products, Reps, Consignments (rep + line items with product + quantity + date), Sales (rep + line items with product + quantity + unit price + date), Returns (rep + line items with product + quantity + date), and Payouts (rep + amount + date + notes/reference).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Build a web app ConsignFlow for consignment sales teams. Entities: products, reps, consignments (rep + items + qty + date), sales (rep + items + qty + price), returns, payouts."
+        ]
+      },
+      "acceptanceCriteria": [
+        "All listed entities are represented in the backend with stable unique IDs and timestamps where applicable.",
+        "Entities that contain items support multiple line items per record (product + quantity, and unit price for sales).",
+        "Data persists across canister upgrades (no data loss on redeploy/upgrade)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Expose backend CRUD APIs for all core entities (Products, Reps, Consignments, Sales, Returns, Payouts), including list/filter endpoints needed by the dashboard and statements (at minimum: filter by rep and date range).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Build a web app ConsignFlow for consignment sales teams. Entities: products, reps, consignments (rep + items + qty + date), sales (rep + items + qty + price), returns, payouts."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend can create, read, update, and delete each entity type via canister calls.",
+        "List endpoints support filtering by repId and date range for records that have a date (consignments, sales, returns, payouts).",
+        "Validation errors are returned in a user-consumable way (e.g., missing rep/product, negative quantities/prices rejected)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Build frontend screens for managing core entities with basic workflows: Products, Reps, Consignments, Sales, Returns, and Payouts (create/edit forms, list views, and record detail views).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Entities: products, reps, consignments (rep + items + qty + date), sales (rep + items + qty + price), returns, payouts."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each entity has a dedicated list view with search and/or basic filtering (at minimum by rep and date where applicable).",
+        "Users can create and edit records, including adding/removing multiple line items for consignments/sales/returns.",
+        "UI prevents selecting invalid values (e.g., must pick an existing rep; line items must pick an existing product)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement dashboard calculations and views: (1) amount owed to each rep, (2) inventory by rep, and (3) profit/commission calculations based on configurable commission rules.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Dashboard: owed to each rep, inventory by rep, profit/commission rules."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard shows a table of reps with 'Amount Owed' computed from sales minus returns minus payouts, adjusted by commission rules.",
+        "Dashboard shows inventory by rep computed from consignments minus sales minus returns (quantities aggregated by product).",
+        "Commission rules are configurable in-app (at minimum: a default commission % and the ability to override per rep), and the dashboard reflects the chosen configuration.",
+        "All calculations are consistent between dashboard, CSV exports, and printable statements for the same inputs/date range."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add CSV export for core entities and key reports, including exports for: Products, Reps, Consignments, Sales, Returns, Payouts, and dashboard report exports (owed-by-rep and inventory-by-rep).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Add CSV export"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each relevant screen provides an 'Export CSV' action that downloads a UTF-8 CSV file.",
+        "Exports include clear headers and stable columns; line-item entities export with one row per line item (including parent record fields).",
+        "Users can export within a selected date range for dated records (consignments/sales/returns/payouts) and for report exports."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Generate printable monthly statements per rep that include: sales, returns, payouts, starting balance (if supported), ending balance/amount owed, and summary totals for the selected month; provide a print-friendly layout and a PDF-ready browser print flow.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "printable monthly statement"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can select a rep and a month to generate a statement.",
+        "Statement includes itemized sales, returns, and payouts within the month and a computed ending balance/amount owed.",
+        "Statement has a print stylesheet/layout that prints cleanly on letter/A4 without UI navigation chrome.",
+        "Statement computations match dashboard computations for the same rep/date range."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Define and apply a coherent visual theme for ConsignFlow (colors, typography, spacing, and component styling) that is consistent across dashboard, forms, tables, and print views; avoid blue/purple as primary brand colors.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Build a web app ConsignFlow for consignment sales teams."
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI uses a consistent design system across all screens (tables, buttons, inputs, headings, empty states).",
+        "Primary palette does not use blue/purple as the dominant brand colors.",
+        "Print view uses a simplified theme optimized for readability."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
+    "Do not edit files under frontend/src/components/ui or other immutable paths specified by the platform; compose them instead.",
+    "Do not add third-party authentication providers; Internet Identity is the only supported auth mechanism if authentication is added later."
+  ],
+  "nonGoals": [
+    "Real-time updates (WebSockets or live collaboration).",
+    "Integration with external accounting platforms or external databases.",
+    "Payments processing or invoicing to reps/customers."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

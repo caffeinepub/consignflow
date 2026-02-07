@@ -1,0 +1,224 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "ConsignFlow frontend: entity management, dashboard, CSV export, and printable statements",
+  "requirements": [
+    {
+      "id": "REQ-3",
+      "summary": "Build frontend CRUD screens for Products, Reps, Consignments, Sales, Returns, and Payouts with list/detail and multi-line-item create/edit workflows.",
+      "acceptanceCriteria": [
+        "Each entity has a dedicated list view with search and/or basic filtering (at minimum by rep and date where applicable).",
+        "Users can create and edit records, including adding/removing multiple line items for consignments/sales/returns.",
+        "UI prevents selecting invalid values (e.g., must pick an existing rep; line items must pick an existing product)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the main app shell with navigation to Dashboard, Products, Reps, Consignments, Sales, Returns, Payouts, and Statements screens. Use the shadcn-ui component library for consistent layout primitives (e.g., navigation, buttons, cards, tabs). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/api/useConsignFlowApi.ts",
+          "operation": "create",
+          "description": "Create a typed frontend API hook layer wrapping canister calls from the generated backend interface and integrating with TanStack Query for caching/refetching. Use core-infrastructure backend connection configuration to obtain the canister client. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/products/ProductsPage.tsx",
+          "operation": "create",
+          "description": "Add Products management UI: list + search, create/edit form, and detail view composition. Use shadcn-ui table, form controls, dialogs/drawers for create/edit. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/reps/RepsPage.tsx",
+          "operation": "create",
+          "description": "Add Reps management UI: list + search, create/edit form, and detail view; include commission override controls (also used by dashboard). Use shadcn-ui components for forms/tables. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/ConsignmentsPage.tsx",
+          "operation": "create",
+          "description": "Add Consignments UI: list with rep + date filtering, detail view, and create/edit form that supports adding/removing multiple line items (product + quantity). Where backend capability is single-item records, implement a UI-level strategy to submit multiple line items as multiple backend records while keeping the UI multi-line. Use shadcn-ui form/table components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/SalesPage.tsx",
+          "operation": "create",
+          "description": "Add Sales UI: list with rep + date filtering, detail view, and create/edit form supporting multiple line items (product + quantity + unit price). Include validation for non-negative quantities/prices and required rep/product selection. Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/ReturnsPage.tsx",
+          "operation": "create",
+          "description": "Add Returns UI: list with rep + date filtering, detail view, and create/edit form supporting multiple line items (product + quantity). Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/PayoutsPage.tsx",
+          "operation": "create",
+          "description": "Add Payouts UI: list with rep + date filtering, detail view, and create/edit form (rep, amount, date, notes/reference). Use shadcn-ui components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/ui/RepProductPickers.tsx",
+          "operation": "create",
+          "description": "Create reusable controlled pickers for selecting an existing Rep and Product (with async loading and empty/loading states) to prevent invalid selection across record forms. Use shadcn-ui select/combobox patterns. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/ui/LineItemsEditor.tsx",
+          "operation": "create",
+          "description": "Create a reusable line-items editor component (add/remove rows; per-row product selection + numeric inputs; optional unit price) used by consignments/sales/returns forms. Use shadcn-ui table/inputs/buttons. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/ui/DateRangeFilter.tsx",
+          "operation": "create",
+          "description": "Create a reusable date range filter control used on lists and reports; output a normalized inclusive range used by calculations/CSV/statement generation. Use shadcn-ui inputs/popovers if available. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Implement dashboard views and shared calculation logic for amount owed, inventory by rep, and commission/profit with configurable commission rules.",
+      "acceptanceCriteria": [
+        "Dashboard shows a table of reps with 'Amount Owed' computed from sales minus returns minus payouts, adjusted by commission rules.",
+        "Dashboard shows inventory by rep computed from consignments minus sales minus returns (quantities aggregated by product).",
+        "Commission rules are configurable in-app (at minimum: a default commission % and the ability to override per rep), and the dashboard reflects the chosen configuration.",
+        "All calculations are consistent between dashboard, CSV exports, and printable statements for the same inputs/date range."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/dashboard/DashboardPage.tsx",
+          "operation": "create",
+          "description": "Create the Dashboard screen with (1) owed-by-rep table and (2) inventory-by-rep table, each filterable by date range and optionally rep. Use shadcn-ui tables/cards/tabs and clear empty states. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/settings/commissionSettings.ts",
+          "operation": "create",
+          "description": "Implement frontend-only commission configuration (default commission percentage + per-rep override) persisted in localStorage; expose typed getters/setters to be reused by dashboard, exports, and statements."
+        },
+        {
+          "path": "frontend/src/features/reports/calculations.ts",
+          "operation": "create",
+          "description": "Implement shared pure calculation utilities: totals by rep, owed amount (sales - returns - payouts adjusted by commission), and inventory aggregation by rep/product (consignments - sales - returns) over a selected date range. These functions must be the single source of truth reused by dashboard, CSV exports, and monthly statements."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the new DashboardPage into the app navigation and ensure it is a primary landing screen. Use shadcn-ui navigation primitives for consistent styling. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add CSV exports for all core entity screens and key dashboard reports with stable columns and date-range support.",
+      "acceptanceCriteria": [
+        "Each relevant screen provides an 'Export CSV' action that downloads a UTF-8 CSV file.",
+        "Exports include clear headers and stable columns; line-item entities export with one row per line item (including parent record fields).",
+        "Users can export within a selected date range for dated records (consignments/sales/returns/payouts) and for report exports."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/exports/csv.ts",
+          "operation": "create",
+          "description": "Create a CSV utility to build UTF-8 CSV strings with stable headers and trigger a browser download; include helpers to flatten multi-line-item forms/records into one row per line item."
+        },
+        {
+          "path": "frontend/src/features/exports/exportMappers.ts",
+          "operation": "create",
+          "description": "Add mapping functions to convert Products, Reps, Consignments, Sales, Returns, Payouts, and dashboard report rows (owed-by-rep, inventory-by-rep) into CSV row objects with stable column ordering; reuse shared calculation utilities where applicable."
+        },
+        {
+          "path": "frontend/src/features/products/ProductsPage.tsx",
+          "operation": "modify",
+          "description": "Add an 'Export CSV' action to the Products screen using the CSV utilities. Use shadcn-ui button/dropdown patterns. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/reps/RepsPage.tsx",
+          "operation": "modify",
+          "description": "Add an 'Export CSV' action to the Reps screen using the CSV utilities. Use shadcn-ui button/dropdown patterns. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/ConsignmentsPage.tsx",
+          "operation": "modify",
+          "description": "Add date-range filtering and an 'Export CSV' action that exports one row per line item (including parent fields like rep/date). Use shadcn-ui controls. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/SalesPage.tsx",
+          "operation": "modify",
+          "description": "Add date-range filtering and an 'Export CSV' action that exports one row per line item (including unit price). Use shadcn-ui controls. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/ReturnsPage.tsx",
+          "operation": "modify",
+          "description": "Add date-range filtering and an 'Export CSV' action that exports one row per line item. Use shadcn-ui controls. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/records/PayoutsPage.tsx",
+          "operation": "modify",
+          "description": "Add date-range filtering and an 'Export CSV' action for payouts. Use shadcn-ui controls. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Add dashboard report CSV exports for owed-by-rep and inventory-by-rep for the selected date range; reuse shared calculations to guarantee consistency. Use shadcn-ui button/dropdown patterns. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Generate print-friendly monthly statements per rep with itemized records, computed balances, and a browser print flow suitable for PDF.",
+      "acceptanceCriteria": [
+        "User can select a rep and a month to generate a statement.",
+        "Statement includes itemized sales, returns, and payouts within the month and a computed ending balance/amount owed.",
+        "Statement has a print stylesheet/layout that prints cleanly on letter/A4 without UI navigation chrome.",
+        "Statement computations match dashboard computations for the same rep/date range."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/statements/StatementsPage.tsx",
+          "operation": "create",
+          "description": "Create a Statements screen where the user selects a rep and month, previews a statement, and triggers browser print. Use shadcn-ui form controls, cards, and tables for the preview. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/statements/StatementView.tsx",
+          "operation": "create",
+          "description": "Implement the statement layout: rep header, selected month, itemized sales/returns/payouts tables, summary totals, and ending balance/amount owed computed via the shared calculations. Use shadcn-ui table/typography patterns. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/statements/statementDateUtils.ts",
+          "operation": "create",
+          "description": "Add utilities to compute month start/end timestamps (inclusive range) and to label months consistently; used by statement generation and filtering."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the Statements page into the app navigation so it is discoverable from the main UI. Use shadcn-ui navigation components. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Add print-specific styles to hide navigation chrome and optimize statement readability on letter/A4 (e.g., simplified spacing, table borders, font sizing) using @media print and a statement container class."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Define and apply a coherent ConsignFlow visual theme (non-blue/purple primary) consistent across screens and optimized for print.",
+      "acceptanceCriteria": [
+        "UI uses a consistent design system across all screens (tables, buttons, inputs, headings, empty states).",
+        "Primary palette does not use blue/purple as the dominant brand colors.",
+        "Print view uses a simplified theme optimized for readability."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Define app-wide design tokens via CSS variables (shadcn-style) for colors/typography/spacing with a non-blue/purple primary palette (e.g., charcoal + green/amber accents). Ensure base typography and table styles are consistent, and include print-optimized overrides. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Apply consistent layout structure (page container, headings, section spacing, standardized empty states) and ensure all screens use composed shadcn-ui components rather than custom one-off styling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Align Tailwind theme usage with the app's CSS variables and ensure typography/container settings support consistent spacing across dashboards, forms, tables, and print views."
+        }
+      ]
+    }
+  ]
+}
