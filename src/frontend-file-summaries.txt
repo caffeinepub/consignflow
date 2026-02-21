@@ -1,6 +1,6 @@
 {
   "frontend/src/App.tsx": "Main application component with TanStack Router setup, defining all routes including new settlement-periods and adjustments routes, wrapped with ThemeProvider and Toaster.",
-  "frontend/src/components/AppLayout.tsx": "Application layout component with header, navigation tabs (including Settlement Periods and Adjustments), main content area, and footer; provides consistent structure across all pages.",
+  "frontend/src/components/AppLayout.tsx": "Application layout component with header, navigation tabs for all pages (Dashboard, Products, Reps, Consignments, Sales, Returns, Payouts, Statements, Settlement Periods, Adjustments), main content area, and footer with dynamic year and proper UTM tracking; provides consistent structure across all pages.",
   "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including products, reps, consignments, sales, returns, payouts, settlement periods, and adjustments with proper caching and invalidation; imports SettlementStatus as a value (not type-only) to use as enum.",
   "frontend/src/lib/calculations.ts": "Pure calculation functions for rep balances (sales - returns - payouts with commission) and inventory aggregation (consignments - sales - returns) with date filtering support.",
   "frontend/src/lib/commissionSettings.ts": "Commission configuration management with localStorage persistence, supporting default commission rate and per-rep overrides.",

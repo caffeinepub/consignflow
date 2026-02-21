@@ -85,6 +85,7 @@ export interface _SERVICE {
   'getAllSettlementPeriods' : ActorMethod<[], Array<SettlementPeriodView>>,
   'getConsignment' : ActorMethod<[bigint], Consignment>,
   'getConsignmentsByRep' : ActorMethod<[bigint], Array<Consignment>>,
+  'getCurrentTimestamp' : ActorMethod<[], Timestamp>,
   'getPayout' : ActorMethod<[bigint], Payout>,
   'getPayoutsByRep' : ActorMethod<[bigint], Array<Payout>>,
   'getProduct' : ActorMethod<[bigint], Product>,

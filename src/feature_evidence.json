@@ -2,14 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-frontend-settlement-periods-management-ui-to-create-view-and-close-settlement-periods-and-to-navigate-to-linked-statements-for-a-period",
-      "featureTitle": "Add a frontend Settlement Periods management UI to create, view, and close settlement periods, and to navigate to linked statements for a period.",
+      "featureId": "feature-implement-backend-data-models-and-persistent-storage-for-products-reps-consignments-rep-line-items-with-product-quantity-date-sales-rep-line-items-with-product-quantity-unit-price-date-returns-rep-line-items-with-product-quantity-date-and-payouts-rep-amount-date-notes-reference",
+      "featureTitle": "Implement backend data models and persistent storage for: Products, Reps, Consignments (rep + line items with product + quantity + date), Sales (rep + line items with product + quantity + unit price + date), Returns (rep + line items with product + quantity + date), and Payouts (rep + amount + date + notes/reference).",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AppLayout.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/SettlementPeriodsPage.tsx",
-        "frontend/src/pages/StatementsPage.tsx"
+        "frontend/src/components/AppLayout.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -19,72 +15,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-17"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-statements-generation-ui-to-support-settlement-periods-allow-selecting-a-settlement-period-in-addition-to-or-instead-of-month-year-show-opening-balance-and-closing-balance-for-that-period-and-persist-link-the-generated-statement-to-the-settlement-period",
-      "featureTitle": "Update statements generation UI to support settlement periods: allow selecting a settlement period (in addition to or instead of month/year), show opening balance and closing balance for that period, and persist/link the generated statement to the settlement period.",
-      "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/SettlementPeriodsPage.tsx",
-        "frontend/src/pages/StatementsPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-18"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-enforce-settlement-locking-in-the-frontend-when-a-user-attempts-to-create-or-edit-consignments-sales-returns-or-payouts-dated-within-a-closed-settlement-period-block-the-action-in-the-ui-and-explain-that-the-period-is-closed-provide-a-path-to-create-an-adjustment-instead",
-      "featureTitle": "Enforce settlement locking in the frontend: when a user attempts to create or edit consignments, sales, returns, or payouts dated within a closed settlement period, block the action in the UI and explain that the period is closed; provide a path to create an Adjustment instead.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/lib/settlementLock.ts",
-        "frontend/src/pages/ConsignmentsPage.tsx",
-        "frontend/src/pages/PayoutsPage.tsx",
-        "frontend/src/pages/ReturnsPage.tsx",
-        "frontend/src/pages/SalesPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-19"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-an-adjustments-ui-for-recording-and-listing-adjustments-including-the-ability-to-enter-adjustments-dated-within-closed-settlement-periods",
-      "featureTitle": "Add an Adjustments UI for recording and listing adjustments, including the ability to enter adjustments dated within closed settlement periods.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AppLayout.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdjustmentsPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-20"
+        "REQ-1"
       ],
       "confidence": "high"
     }

@@ -1,86 +1,39 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T17:14:41.343Z",
-  "summary": "The diff adds backend scaffolding for settlement periods and adjustments (including state migration), adds Settlement Periods + Adjustments pages and navigation, and introduces a frontend settlement-lock utility and UI checks on several create flows. However, key statement-period integration (REQ-18) is not implemented in the shown Statements UI, and several backend settlement-period invariants/APIs and accounting carry-forward requirements cannot be confirmed from the truncated backend diff.",
-  "missing_requirements": [
-    {
-      "id": "REQ-14",
-      "requirement": "Backend exposes APIs to create/list/fetch-by-id/close settlement periods; prevents overlapping periods; closed periods are immutable; and stores retrievable statement link(s) per period.",
-      "reason": "The diff shows SettlementPeriod types/storage and some frontend hooks usage, but the backend API surface and invariants (non-overlap, immutability, get-by-id, statement links retrieval) are not evidenced in the truncated backend/main.mo snippet or elsewhere in the diff summary.",
-      "evidence": [
-        "backend/main.mo (truncated; only shows type definitions and addConsignment calling enforceSettlementLock)",
-        "backend/migration.mo (adds settlements with statementIds, but no API behavior shown)"
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "requirement": "Backend supports Adjustments APIs (create + list) and enforces locking for addConsignment/addSale/addReturn/addPayout by rejecting dates within closed periods with deterministic English errors; addAdjustment must still be allowed within closed periods.",
-      "reason": "The backend snippet only shows lock enforcement in addConsignment; enforcement for addSale/addReturn/addPayout and adjustment APIs/allowance behavior are not visible in the diff summary due to truncation.",
-      "evidence": [
-        "backend/main.mo (truncated; only addConsignment shows enforceSettlementLock)",
-        "backend/migration.mo (adds adjustments map, but no API behavior shown)"
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "requirement": "On close, compute/store per-rep closing balances and carry them forward as next period opening balances; expose an API to retrieve per-rep opening/closing balances for a period.",
-      "reason": "While SettlementPeriod includes openingBalances/closingBalances fields in state, the diff summary does not show close-period accounting logic, deterministic carry-forward behavior on creation of subsequent periods, or a dedicated retrieval API for balances.",
-      "evidence": [
-        "backend/migration.mo (adds openingBalances/closingBalances fields but no computation logic)",
-        "backend/main.mo (truncated; does not show close accounting or carry-forward)"
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "requirement": "Settlement Periods UI must allow navigating to linked statements for a period (rep/period statement references) and show those references on the period detail/selection.",
-      "reason": "SettlementPeriodsPage is truncated and only clearly shows create/close and listing scaffolding; no evidence is shown for displaying statement references (e.g., statementIds) and opening a statement view for a rep/period.",
-      "evidence": [
-        "frontend/src/pages/SettlementPeriodsPage.tsx (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "requirement": "Statements UI supports selecting a settlement period (in addition to or instead of month/year), displays opening/closing balances for that period using backend-provided values, and persists/links a generated statement to the settlement period; monthly flow must remain functional.",
-      "reason": "StatementsPage remains explicitly a 'Monthly Statements' page with month/year selection and no settlement-period selection, no opening/closing balances sourced from settlement periods, and no persistence/linking of generated statements to a settlement period.",
-      "evidence": [
-        "frontend/src/pages/StatementsPage.tsx (shows month/year selection; title 'Monthly Statements'; no settlement period selection/linking)"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-21T00:45:41.982Z",
+  "summary": "The diff shows modifications to backend/main.mo (settlement periods, adjustments, settlement lock enforcement), frontend AppLayout (navigation), and updated project state documenting existing features. The BuildRequest has no explicit requirements and focuses on preservation constraints. The changes appear to be adding settlement periods and adjustments functionality while maintaining existing features.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Added footer branding and copyright year ('© 2026. Built with ... caffeine.ai')",
-      "reason": "Not requested by any requirement; BuildRequest focuses on settlement periods/locking/adjustments/statements integration and includes constraints about not modifying certain frontend paths, but does not request new branding/footer content.",
+      "description": "Settlement Periods feature with opening/closing balances, status management, and settlement lock enforcement",
+      "reason": "BuildRequest explicitly states 'Requirements: none' and 'Acceptance Criteria: none'. The addition of SettlementPeriod type, settlement-related functions (addSettlementPeriod, closeSettlement, enforceSettlementLock), and Settlement Periods navigation tab was not requested.",
       "evidence": [
+        "backend/main.mo",
         "frontend/src/components/AppLayout.tsx"
       ]
     },
     {
-      "description": "Introduced new routes/pages for Adjustments and Settlement Periods (beyond just integrating with statements)",
-      "reason": "While Adjustments and Settlement Periods pages are requested (REQ-17, REQ-20), the diff also adds navigation and routing changes that may include additional layout/navigation changes not explicitly requested (e.g., new nav icons/tabs).",
+      "description": "Adjustments feature with adjustment tracking and management",
+      "reason": "BuildRequest has no requirements. The addition of Adjustment type, adjustment CRUD operations, and Adjustments navigation tab/page was not requested.",
       "evidence": [
-        "frontend/src/App.tsx",
+        "backend/main.mo",
         "frontend/src/components/AppLayout.tsx"
+      ]
+    },
+    {
+      "description": "Settlement lock validation preventing transactions in closed periods",
+      "reason": "BuildRequest contains no requirements for settlement locking. The enforceSettlementLock function and related validation logic was not requested.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.95,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
     "frontend/src/components/AppLayout.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/settlementLock.ts",
-    "frontend/src/pages/AdjustmentsPage.tsx",
-    "frontend/src/pages/ConsignmentsPage.tsx",
-    "frontend/src/pages/PayoutsPage.tsx",
-    "frontend/src/pages/ReturnsPage.tsx",
-    "frontend/src/pages/SalesPage.tsx",
-    "frontend/src/pages/SettlementPeriodsPage.tsx",
-    "frontend/src/pages/StatementsPage.tsx",
     "project_state.json"
   ]
 }

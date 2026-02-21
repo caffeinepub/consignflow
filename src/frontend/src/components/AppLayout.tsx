@@ -1,6 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, Package, Users, TrendingUp, TrendingDown, DollarSign, FileText, ArrowLeftRight, Calendar, Edit3 } from 'lucide-react';
-import { SiCoffeescript } from 'react-icons/si';
+import { LayoutDashboard, Package, Users, TrendingUp, TrendingDown, DollarSign, FileText, ArrowLeftRight, Calendar, Edit3, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
@@ -23,6 +22,8 @@ const navigation = [
 export default function AppLayout({ children }: AppLayoutProps) {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
+  const currentYear = new Date().getFullYear();
+  const appIdentifier = typeof window !== 'undefined' ? encodeURIComponent(window.location.hostname) : 'consignflow';
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,8 +70,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       <footer className="mt-16 border-t border-border bg-card/50 py-8 print:hidden">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026. Built with <SiCoffeescript className="inline h-4 w-4 text-primary" /> using{' '}
-          <a href="https://caffeine.ai" target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:text-primary">
+          © {currentYear}. Built with <Heart className="inline h-4 w-4 text-accent fill-accent" /> using{' '}
+          <a 
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appIdentifier}`}
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="font-medium text-foreground hover:text-primary transition-colors"
+          >
             caffeine.ai
           </a>
         </div>

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
+  "projectStateVersion": 9,
   "summary": "ConsignFlow: a web app for managing consignment sales teams (products, reps, consignments, sales, returns, payouts) with dashboards, exports, and printable statements, now expanding in Version 2 to include end-user captivation features: enhanced UI/visual hierarchy with animations, onboarding, guided/stateful workflows informed by history, identity/role-based analytics (originality scoring via advanced histograms), and personalized gradient UI transforms based on user favorite color sets.",
   "architectural_notes": [
     "Consignments, sales, and returns are itemized (line items with product, quantity, and transaction date) and associated to a rep.",
@@ -116,6 +116,14 @@
         "REQ-20"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-implement-backend-data-models-and-persistent-storage-for-products-reps-consignments-rep-line-items-with-product-quantity-date-sales-rep-line-items-with-product-quantity-unit-price-date-returns-rep-line-items-with-product-quantity-date-and-payouts-rep-amount-date-notes-reference",
+      "title": "Implement backend data models and persistent storage for: Products, Reps, Consignments (rep + line items with product + quantity + date), Sales (rep + line items with product + quantity + unit price + date), Returns (rep + line items with product + quantity + date), and Payouts (rep + amount + date + notes/reference).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -141,14 +149,6 @@
       "id": "AR-4",
       "summary": "Generate printable monthly statements for reps (including sales, returns, payouts, and balances)",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Implement backend data models and persistent storage for: Products, Reps, Consignments (rep + line items with product + quantity + date), Sales (rep + line items with product + quantity + unit price + date), Returns (rep + line items with product + quantity + date), and Payouts (rep + amount + date + notes/reference).",
-      "reqIds": [
-        "REQ-1"
-      ],
       "status": "pending"
     },
     {

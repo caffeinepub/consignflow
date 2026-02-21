@@ -1,137 +1,100 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T17:14:41.346Z",
+  "generatedAt": "2026-02-21T00:45:41.985Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 4,
+    "total": 5,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-14",
-        "summary": "Implement backend data model and APIs for Settlement Periods with fields: startDate, endDate, status (open/closed), and links to generated statements.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Add backend support for Adjustments and enforce settlement locking rules: when a settlement period is closed, prevent creation/edits of consignments, sales, returns, and payouts dated within that closed period; allow only adjustments dated within that range.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-16",
-        "summary": "Implement settlement close accounting: on close, compute and store per-rep closing balances for the period and carry them forward as the next period’s opening balances.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-17",
-        "summary": "Add a frontend Settlement Periods management UI to create, view, and close settlement periods, and to navigate to linked statements for a period.",
+        "id": "REQ-1",
+        "summary": "Preserve all existing frontend features and ensure compatibility with selected components",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/SettlementPeriodsPage.tsx",
-          "frontend/src/hooks/useQueries.ts",
           "frontend/src/App.tsx",
           "frontend/src/components/AppLayout.tsx",
-          "frontend/src/pages/StatementsPage.tsx"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
         ],
         "matchedFiles": [
-          "frontend/src/pages/SettlementPeriodsPage.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/components/AppLayout.tsx",
-          "frontend/src/pages/StatementsPage.tsx"
+          "frontend/src/components/AppLayout.tsx"
         ]
       },
       {
-        "id": "REQ-18",
-        "summary": "Update statements generation UI to support settlement periods: allow selecting a settlement period (in addition to or instead of month/year), show opening balance and closing balance for that period, and persist/link the generated statement to the settlement period.",
-        "status": "implemented",
+        "id": "REQ-2",
+        "summary": "Preserve onboarding and guided workflow features",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/StatementsPage.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/backend.d.ts",
-          "frontend/src/pages/SettlementPeriodsPage.tsx"
+          "frontend/src/pages/DashboardPage.tsx",
+          "frontend/src/components/CommissionSettingsDialog.tsx",
+          "frontend/src/lib/settlementLock.ts"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/StatementsPage.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/backend.d.ts",
-          "frontend/src/pages/SettlementPeriodsPage.tsx"
-        ]
+        "matchedFiles": []
       },
       {
-        "id": "REQ-19",
-        "summary": "Enforce settlement locking in the frontend: when a user attempts to create or edit consignments, sales, returns, or payouts dated within a closed settlement period, block the action in the UI and explain that the period is closed; provide a path to create an Adjustment instead.",
-        "status": "implemented",
+        "id": "REQ-3",
+        "summary": "Preserve user personalization and theming capabilities",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/lib/settlementLock.ts",
-          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/main.tsx",
+          "frontend/src/hooks/useInternetIdentity.ts"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Preserve all entity management pages and CRUD operations",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/pages/ProductsPage.tsx",
+          "frontend/src/pages/RepsPage.tsx",
           "frontend/src/pages/ConsignmentsPage.tsx",
           "frontend/src/pages/SalesPage.tsx",
           "frontend/src/pages/ReturnsPage.tsx",
           "frontend/src/pages/PayoutsPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/pages/AdjustmentsPage.tsx",
+          "frontend/src/pages/SettlementPeriodsPage.tsx",
+          "frontend/src/pages/StatementsPage.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/lib/settlementLock.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/ConsignmentsPage.tsx",
-          "frontend/src/pages/SalesPage.tsx",
-          "frontend/src/pages/ReturnsPage.tsx",
-          "frontend/src/pages/PayoutsPage.tsx",
-          "frontend/src/App.tsx"
-        ]
+        "matchedFiles": []
       },
       {
-        "id": "REQ-20",
-        "summary": "Add an Adjustments UI for recording and listing adjustments, including the ability to enter adjustments dated within closed settlement periods.",
-        "status": "implemented",
+        "id": "REQ-5",
+        "summary": "Preserve all shared components and utilities",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/pages/AdjustmentsPage.tsx",
+          "frontend/src/components/LineItemsEditor.tsx",
+          "frontend/src/components/ProductSelect.tsx",
+          "frontend/src/components/RepSelect.tsx",
+          "frontend/src/components/DateRangeFilter.tsx",
+          "frontend/src/hooks/useActor.ts",
           "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/components/AppLayout.tsx"
+          "frontend/src/lib/calculations.ts",
+          "frontend/src/lib/commissionSettings.ts",
+          "frontend/src/lib/csv.ts",
+          "frontend/src/lib/dateUtils.ts"
         ],
-        "matchedFiles": [
-          "frontend/src/pages/AdjustmentsPage.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx",
-          "frontend/src/components/AppLayout.tsx"
-        ]
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/components/AppLayout.tsx",
+    "frontend/src/config.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/settlementLock.ts",
-    "frontend/src/pages/AdjustmentsPage.tsx",
-    "frontend/src/pages/ConsignmentsPage.tsx",
-    "frontend/src/pages/PayoutsPage.tsx",
-    "frontend/src/pages/ReturnsPage.tsx",
-    "frontend/src/pages/SalesPage.tsx",
-    "frontend/src/pages/SettlementPeriodsPage.tsx",
-    "frontend/src/pages/StatementsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

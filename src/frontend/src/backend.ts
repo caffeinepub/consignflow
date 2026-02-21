@@ -171,6 +171,7 @@ export interface backendInterface {
     getAllSettlementPeriods(): Promise<Array<SettlementPeriodView>>;
     getConsignment(id: bigint): Promise<Consignment>;
     getConsignmentsByRep(repId: bigint): Promise<Array<Consignment>>;
+    getCurrentTimestamp(): Promise<Timestamp>;
     getPayout(id: bigint): Promise<Payout>;
     getPayoutsByRep(repId: bigint): Promise<Array<Payout>>;
     getProduct(id: bigint): Promise<Product>;
@@ -477,6 +478,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getConsignmentsByRep(arg0);
+            return result;
+        }
+    }
+    async getCurrentTimestamp(): Promise<Timestamp> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCurrentTimestamp();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCurrentTimestamp();
             return result;
         }
     }

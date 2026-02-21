@@ -1,155 +1,211 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Settlement Periods UI, Adjustments, Statement Period Selection, and Frontend Locking",
+  "title": "Version 2: Core Consignment/Accounting Improvements - Frontend Preservation",
   "requirements": [
     {
-      "id": "REQ-17",
-      "summary": "Add Settlement Periods management UI to create, view, and close periods and navigate to linked statements.",
+      "id": "REQ-1",
+      "summary": "Preserve all existing frontend features and ensure compatibility with selected components",
       "acceptanceCriteria": [
-        "App navigation includes a new entry \"Settlement Periods\" that routes to a new page.",
-        "Settlement Periods page shows a list of periods with start date, end date, and status (Open/Closed).",
-        "User can create a new open period by selecting startDate and endDate; the UI validates obvious issues (missing dates, end before start) before calling the backend.",
-        "User can close an open period via an explicit confirmation step; after success, the period displays as Closed.",
-        "For a selected period, UI shows the linked statement references and provides a way to open the corresponding statement view for a rep/period.",
-        "All user-facing text is in English."
+        "All existing pages remain functional and accessible",
+        "Theme and styling are preserved",
+        "All CRUD operations for entities continue to work",
+        "Navigation and routing remain intact",
+        "User-friendliness features (animations, layout hierarchy, visual theming) are maintained"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/SettlementPeriodsPage.tsx",
-          "operation": "create",
-          "description": "Create a Settlement Periods management page using shadcn-ui components (Card, Table, Dialog/AlertDialog, Button, Input/Label) to list periods (start/end/status), create a new period with basic date validation, and close a period with explicit confirmation. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add React Query hooks for settlement periods (list, create, close, get by id as needed) using existing React Query patterns; ensure queries are invalidated after create/close so the list refreshes."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire the new Settlement Periods page into TanStack Router by adding a new route (e.g., /settlement-periods) and include it in the route tree."
+          "description": "Verify router configuration includes all existing routes (dashboard, products, reps, consignments, sales, returns, payouts, adjustments, settlement periods, statements) and ensure theme provider and toaster remain wired"
         },
         {
           "path": "frontend/src/components/AppLayout.tsx",
           "operation": "modify",
-          "description": "Add a \"Settlement Periods\" navigation item to the existing top nav so users can reach the new route; use existing nav styling and icon pattern."
+          "description": "Ensure layout component continues to provide header, navigation tabs, main content area, and footer with proper styling and accessibility"
         },
         {
-          "path": "frontend/src/pages/StatementsPage.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Add support for navigating into Statements from a settlement period context (e.g., via search params/state) so the Settlement Periods page can deep-link the user to the correct statement generation/view."
+          "description": "Verify Tailwind base styles, theme color tokens (OKLCH), print rules, and global background/foreground styling are preserved"
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Ensure Tailwind configuration maintains theme colors, typography, animations, container settings, and plugins for consistent styling across all pages"
         }
       ]
     },
     {
-      "id": "REQ-18",
-      "summary": "Update statements UI to support settlement-period selection, show opening/closing balances for the period, and link generated statements to periods.",
+      "id": "REQ-2",
+      "summary": "Preserve onboarding and guided workflow features",
       "acceptanceCriteria": [
-        "Statements UI can be generated for a settlement period date range (startDate–endDate) and a selected rep.",
-        "Statement view displays opening balance and closing balance for the selected settlement period using backend-provided values.",
-        "When a statement is generated/printed for a rep + settlement period, the app stores a statement reference/link on the backend and shows it under that settlement period later.",
-        "Existing monthly statement flow remains functional (at minimum) until settlement-period statements fully cover the same use case."
+        "Users can complete onboarding flows",
+        "Guided workflows remain functional",
+        "Validation and settlement lock checks continue to work"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/StatementsPage.tsx",
+          "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "modify",
-          "description": "Extend the Statements page UI to support a second generation mode for Settlement Period statements (in addition to existing monthly flow): allow selecting a settlement period and rep; compute the date range from the selected period; display opening and closing balances from backend-provided settlement period balances; keep the monthly statement flow functional. Use shadcn-ui components for selects/tables/cards as already used on the page. Verify the component's usage instructions before implementing."
+          "description": "Verify dashboard displays rep balances and inventory with date filters, CSV export, and commission settings dialog remain functional"
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/CommissionSettingsDialog.tsx",
           "operation": "modify",
-          "description": "Add queries/mutations needed by Statements to load settlement periods (including per-rep opening/closing balances) and to call the backend capability that persists a statement reference/link for a given rep + settlement period after the user generates/prints."
+          "description": "Ensure dialog for viewing and editing default commission rates and per-rep overrides with validation and persistence continues to work"
         },
-        {
-          "path": "frontend/src/backend.d.ts",
-          "operation": "modify",
-          "description": "Update frontend backend type declarations to include any newly-added backend functions required for settlement-period statement linking and retrieving settlement-period balance/link data needed by the Statements UI."
-        },
-        {
-          "path": "frontend/src/pages/SettlementPeriodsPage.tsx",
-          "operation": "modify",
-          "description": "Show statement references/links for each settlement period and provide navigation into the Statements page for the chosen period (and rep where applicable). Use shadcn-ui components (Table, Button, Select) for consistent UI. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "summary": "Enforce settlement locking rules in the UI for consignments, sales, returns, and payouts, with a clear path to create an Adjustment.",
-      "acceptanceCriteria": [
-        "Create flows for consignments, sales, returns, and payouts prevent submission when the chosen date falls within a closed settlement period (UI disables submit or shows validation error).",
-        "If the backend rejects due to a closed period, the UI displays a clear English error message and does not silently fail.",
-        "UI provides a clear next step to record an adjustment (e.g., link/button to the Adjustments page or open an adjustment dialog) when an operation is blocked due to a closed period.",
-        "No changes are made to any frontend immutablePaths listed in SYSTEM_CONTEXT."
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/lib/settlementLock.ts",
-          "operation": "create",
-          "description": "Add a small utility to determine whether a given date falls within any closed settlement period, and to produce a deterministic English explanation message for the UI; this will be reused across create flows."
+          "operation": "modify",
+          "description": "Verify settlement period lock checks and date validation remain enforced across transaction pages"
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Preserve user personalization and theming capabilities",
+      "acceptanceCriteria": [
+        "Theme switching works correctly",
+        "User preferences are persisted",
+        "Visual theming and animations remain captivating"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Verify React app bootstrapping with React Query and Internet Identity providers (even if auth is not used) remains functional for future extensibility"
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/hooks/useInternetIdentity.ts",
           "operation": "modify",
-          "description": "Add a query hook to load closed settlement periods (or all periods with filtering) so create flows can validate lock status client-side using React Query patterns."
+          "description": "Ensure Internet Identity context and hooks are preserved but remain optional and do not enforce authentication flows"
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Preserve all entity management pages and CRUD operations",
+      "acceptanceCriteria": [
+        "Products page allows search, creation, listing, and CSV export",
+        "Reps page allows management with search, creation, and CSV export",
+        "Consignments page supports viewing, filtering, exporting, and adding with settlement lock checks",
+        "Sales page lists sales, filters by date, adds sales with line items, and enforces settlement locks",
+        "Returns page logs and exports returns with line-item editing and filters",
+        "Payouts page records, filters, and exports payouts with validation",
+        "Adjustments page lists and creates rep adjustments with validation",
+        "Settlement periods page creates and closes periods with date validation",
+        "Statements page generates monthly printable statements"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ProductsPage.tsx",
+          "operation": "modify",
+          "description": "Verify product management page with search, creation dialog, listing, and CSV export remains functional"
+        },
+        {
+          "path": "frontend/src/pages/RepsPage.tsx",
+          "operation": "modify",
+          "description": "Verify reps management page with search, creation dialog, listing, and CSV export including commission data remains functional"
         },
         {
           "path": "frontend/src/pages/ConsignmentsPage.tsx",
           "operation": "modify",
-          "description": "Before submit, validate the chosen date against closed settlement periods; if locked, block submission (disable submit and/or show inline/toast error) and provide a clear next step to record an adjustment (link/button to the Adjustments page). Use existing shadcn-ui form components and Sonner toasts. Verify the component's usage instructions before implementing."
+          "description": "Verify consignments page with filtering, CSV export, multi-item entry, and settlement lock checks remains functional"
         },
         {
           "path": "frontend/src/pages/SalesPage.tsx",
           "operation": "modify",
-          "description": "Before submit, validate the chosen date against closed settlement periods; if locked, block submission and provide a clear next step to record an adjustment (link/button to the Adjustments page). Also surface clear English errors if the backend rejects due to locking. Use existing shadcn-ui components and Sonner toasts. Verify the component's usage instructions before implementing."
+          "description": "Verify sales page with date filtering, line-item entry, CSV export, and settlement-period lock enforcement remains functional"
         },
         {
           "path": "frontend/src/pages/ReturnsPage.tsx",
           "operation": "modify",
-          "description": "Before submit, validate the chosen date against closed settlement periods; if locked, block submission and provide a clear next step to record an adjustment (link/button to the Adjustments page). Also handle backend lock rejections with clear English error text. Verify the component's usage instructions before implementing."
+          "description": "Verify returns page with line-item editing, date filters, CSV export, and settlement lock enforcement remains functional"
         },
         {
           "path": "frontend/src/pages/PayoutsPage.tsx",
           "operation": "modify",
-          "description": "Before submit, validate the chosen date against closed settlement periods; if locked, block submission and provide a clear next step to record an adjustment (link/button to the Adjustments page). Also handle backend lock rejections with clear English error text. Verify the component's usage instructions before implementing."
+          "description": "Verify payouts page with recording, filtering, CSV export, validation, and settlement lock checks remains functional"
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/AdjustmentsPage.tsx",
           "operation": "modify",
-          "description": "Ensure the Adjustments route exists so lock messages can reliably direct users to the adjustment workflow."
+          "description": "Verify adjustments page with listing, creation dialog, validation, and form submission remains functional"
+        },
+        {
+          "path": "frontend/src/pages/SettlementPeriodsPage.tsx",
+          "operation": "modify",
+          "description": "Verify settlement periods page with creation, closing, date validation, listing, and transaction locking for closed ranges remains functional"
+        },
+        {
+          "path": "frontend/src/pages/StatementsPage.tsx",
+          "operation": "modify",
+          "description": "Verify statements page generates monthly printable statements with rep and date range selection, computing balances, commissions, and related transactions"
         }
       ]
     },
     {
-      "id": "REQ-20",
-      "summary": "Add an Adjustments UI for recording and listing adjustments, including adjustments dated within closed settlement periods.",
+      "id": "REQ-5",
+      "summary": "Preserve all shared components and utilities",
       "acceptanceCriteria": [
-        "App includes an Adjustments page (or equivalent UI) that lists adjustments with key fields (date, rep if applicable, type, amount/qty, reason/note).",
-        "User can create a new adjustment with a date picker and required fields consistent with the backend Adjustment type.",
-        "Creating an adjustment with a date inside a closed settlement period succeeds and appears in lists and downstream calculations/statement totals for that period (as applicable).",
-        "All user-facing text is in English."
+        "Line items editor works for multi-item entry",
+        "Product and rep selects load and display correctly",
+        "Date range filter allows proper date selection",
+        "All hooks continue to fetch and mutate data correctly",
+        "Calculation utilities compute balances and inventory accurately",
+        "CSV utilities generate and download exports properly"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdjustmentsPage.tsx",
-          "operation": "create",
-          "description": "Create an Adjustments page using shadcn-ui components (Card, Table, Dialog, Button, Input/Label, Select/Textarea as needed) to list adjustments and create a new adjustment (rep, date, amount, notes). Ensure the UI allows dates inside closed settlement periods. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/LineItemsEditor.tsx",
+          "operation": "modify",
+          "description": "Verify line items editor for managing product selection, quantity, and optional unit price fields remains functional"
+        },
+        {
+          "path": "frontend/src/components/ProductSelect.tsx",
+          "operation": "modify",
+          "description": "Verify product dropdown loads and displays products with names and formatted prices correctly"
+        },
+        {
+          "path": "frontend/src/components/RepSelect.tsx",
+          "operation": "modify",
+          "description": "Verify rep dropdown loads and displays reps by name correctly"
+        },
+        {
+          "path": "frontend/src/components/DateRangeFilter.tsx",
+          "operation": "modify",
+          "description": "Verify date range selector allows picking, clearing, and applying start/end dates correctly"
+        },
+        {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Verify actor hook creates and manages backend actor and refreshes dependent queries correctly"
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add React Query hooks to list adjustments and create adjustments; invalidate adjustment lists on create and ensure any related settlement-period/statement queries are invalidated as appropriate."
+          "description": "Verify React Query hooks for fetching and mutating all entities (products, reps, consignments, sales, returns, payouts, adjustments, settlement periods) continue to work with the backend interface"
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/lib/calculations.ts",
           "operation": "modify",
-          "description": "Wire the new Adjustments page into TanStack Router by adding a new route (e.g., /adjustments) and include it in the route tree."
+          "description": "Verify calculation functions for rep balances and inventory levels using sales, returns, payouts, consignments, and product data remain accurate"
         },
         {
-          "path": "frontend/src/components/AppLayout.tsx",
+          "path": "frontend/src/lib/commissionSettings.ts",
           "operation": "modify",
-          "description": "Add an \"Adjustments\" navigation entry in the top nav so users can access the adjustments workflow; follow existing nav patterns."
+          "description": "Verify commission settings management with localStorage including defaults and per-rep overrides continues to work"
+        },
+        {
+          "path": "frontend/src/lib/csv.ts",
+          "operation": "modify",
+          "description": "Verify CSV generation, downloading utilities, and formatting helpers for dates and currency remain functional"
+        },
+        {
+          "path": "frontend/src/lib/dateUtils.ts",
+          "operation": "modify",
+          "description": "Verify date utilities for month boundaries, formatting month-year strings, and current month retrieval continue to work"
         }
       ]
     }

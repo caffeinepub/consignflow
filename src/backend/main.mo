@@ -1,12 +1,11 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Nat64 "mo:core/Nat64";
+import Time "mo:core/Time";
 import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   type Timestamp = Int;
 
@@ -393,6 +392,10 @@ actor {
       }
     );
     validPeriods;
+  };
+
+  public query ({ caller }) func getCurrentTimestamp() : async Timestamp {
+    Time.now();
   };
 
   // Conversion helpers

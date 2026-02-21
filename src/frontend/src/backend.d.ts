@@ -89,6 +89,7 @@ export interface backendInterface {
     getAllSettlementPeriods(): Promise<Array<SettlementPeriodView>>;
     getConsignment(id: bigint): Promise<Consignment>;
     getConsignmentsByRep(repId: bigint): Promise<Array<Consignment>>;
+    getCurrentTimestamp(): Promise<Timestamp>;
     getPayout(id: bigint): Promise<Payout>;
     getPayoutsByRep(repId: bigint): Promise<Array<Payout>>;
     getProduct(id: bigint): Promise<Product>;
