@@ -1,35 +1,55 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Download, Search } from 'lucide-react';
-import { useProducts, useAddProduct } from '@/hooks/useQueries';
-import { generateCSV, downloadCSV, formatCurrency } from '@/lib/csv';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useAddProduct, useProducts } from "@/hooks/useQueries";
+import { downloadCSV, formatCurrency, generateCSV } from "@/lib/csv";
+import { Download, Plus, Search } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ProductsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: products = [], isLoading } = useProducts();
   const addProduct = useAddProduct();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
-      toast.error('Product name is required');
+      toast.error("Product name is required");
       return;
     }
 
-    const priceValue = parseFloat(price);
-    if (isNaN(priceValue) || priceValue < 0) {
-      toast.error('Please enter a valid price');
+    const priceValue = Number.parseFloat(price);
+    if (Number.isNaN(priceValue) || priceValue < 0) {
+      toast.error("Please enter a valid price");
       return;
     }
 
@@ -38,25 +58,25 @@ export default function ProductsPage() {
         name: name.trim(),
         price: BigInt(Math.round(priceValue * 100)),
       });
-      toast.success('Product added successfully');
-      setName('');
-      setPrice('');
+      toast.success("Product added successfully");
+      setName("");
+      setPrice("");
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error('Failed to add product');
+      toast.error("Failed to add product");
       console.error(error);
     }
   };
 
   const exportProducts = () => {
-    const headers = ['Name', 'Price'];
+    const headers = ["Name", "Price"];
     const rows = products.map((p) => [p.name, formatCurrency(Number(p.price))]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('products.csv', csv);
+    downloadCSV("products.csv", csv);
   };
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -67,7 +87,12 @@ export default function ProductsPage() {
           <p className="text-muted-foreground">Manage your product catalog</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportProducts} disabled={products.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportProducts}
+            disabled={products.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -81,7 +106,9 @@ export default function ProductsPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
-                <DialogDescription>Enter the product details below</DialogDescription>
+                <DialogDescription>
+                  Enter the product details below
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -106,11 +133,15 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={addProduct.isPending}>
-                    {addProduct.isPending ? 'Adding...' : 'Add Product'}
+                    {addProduct.isPending ? "Adding..." : "Add Product"}
                   </Button>
                 </div>
               </form>
@@ -136,10 +167,21 @@ export default function ProductsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Loading products...</div>
-          ) : filteredProducts.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              {searchTerm ? 'No products match your search.' : 'No products yet. Add your first product to get started.'}
+              Loading products...
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                {searchTerm
+                  ? "No products match your search."
+                  : "No products yet. Add your first product to get started."}
+              </p>
+              {!searchTerm && (
+                <p className="text-xs text-muted-foreground italic">
+                  Every item accounted for. Every partner in the loop.
+                </p>
+              )}
             </div>
           ) : (
             <Table>
@@ -152,8 +194,12 @@ export default function ProductsPage() {
               <TableBody>
                 {filteredProducts.map((product, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(Number(product.price))}</TableCell>
+                    <TableCell className="font-medium">
+                      {product.name}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(Number(product.price))}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

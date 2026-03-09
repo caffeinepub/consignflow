@@ -1,27 +1,57 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Download, AlertCircle } from 'lucide-react';
-import { usePayouts, useAddPayout, useReps, useClosedSettlementPeriods } from '@/hooks/useQueries';
-import { generateCSV, downloadCSV, formatDate, formatCurrency } from '@/lib/csv';
-import RepSelect from '@/components/RepSelect';
-import DateRangeFilter from '@/components/DateRangeFilter';
-import { checkSettlementLock } from '@/lib/settlementLock';
-import { Link } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import DateRangeFilter from "@/components/DateRangeFilter";
+import RepSelect from "@/components/RepSelect";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useAddPayout,
+  useClosedSettlementPeriods,
+  usePayouts,
+  useReps,
+} from "@/hooks/useQueries";
+import {
+  downloadCSV,
+  formatCurrency,
+  formatDate,
+  generateCSV,
+} from "@/lib/csv";
+import { checkSettlementLock } from "@/lib/settlementLock";
+import { Link } from "@tanstack/react-router";
+import { AlertCircle, Download, Plus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function PayoutsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [repId, setRepId] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [notes, setNotes] = useState('');
+  const [repId, setRepId] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [notes, setNotes] = useState("");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
@@ -36,18 +66,18 @@ export default function PayoutsPage() {
     e.preventDefault();
 
     if (!repId) {
-      toast.error('Please select a rep');
+      toast.error("Please select a rep");
       return;
     }
 
-    const amountValue = parseFloat(amount);
-    if (isNaN(amountValue) || amountValue < 0) {
-      toast.error('Please enter a valid amount');
+    const amountValue = Number.parseFloat(amount);
+    if (Number.isNaN(amountValue) || amountValue < 0) {
+      toast.error("Please enter a valid amount");
       return;
     }
 
     if (lockCheck.isLocked) {
-      toast.error('Cannot add payout in closed settlement period');
+      toast.error("Cannot add payout in closed settlement period");
       return;
     }
 
@@ -59,29 +89,29 @@ export default function PayoutsPage() {
         notes: notes.trim(),
       });
 
-      toast.success('Payout added successfully');
-      setRepId('');
-      setAmount('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setNotes('');
+      toast.success("Payout added successfully");
+      setRepId("");
+      setAmount("");
+      setDate(new Date().toISOString().split("T")[0]);
+      setNotes("");
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to add payout';
+      const errorMessage = error?.message || "Failed to add payout";
       toast.error(errorMessage);
       console.error(error);
     }
   };
 
   const exportPayouts = () => {
-    const headers = ['Rep', 'Amount', 'Date', 'Notes'];
+    const headers = ["Rep", "Amount", "Date", "Notes"];
     const rows = filteredPayouts.map((p) => [
-      reps[Number(p.repId)]?.name || 'Unknown',
+      reps[Number(p.repId)]?.name || "Unknown",
       formatCurrency(Number(p.amount)),
       formatDate(p.date),
       p.notes,
     ]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('payouts.csv', csv);
+    downloadCSV("payouts.csv", csv);
   };
 
   const filteredPayouts = payouts.filter((p) => {
@@ -96,7 +126,9 @@ export default function PayoutsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Payouts</h1>
-          <p className="text-muted-foreground">Record commission payouts to reps</p>
+          <p className="text-muted-foreground">
+            Record commission payouts to reps
+          </p>
         </div>
         <div className="flex gap-2">
           <DateRangeFilter
@@ -105,7 +137,12 @@ export default function PayoutsPage() {
             onStartDateChange={setStartDate}
             onEndDateChange={setEndDate}
           />
-          <Button variant="outline" size="sm" onClick={exportPayouts} disabled={filteredPayouts.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportPayouts}
+            disabled={filteredPayouts.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -119,7 +156,9 @@ export default function PayoutsPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Payout</DialogTitle>
-                <DialogDescription>Record a commission payout</DialogDescription>
+                <DialogDescription>
+                  Record a commission payout
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -141,14 +180,19 @@ export default function PayoutsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                    <Input
+                      id="date"
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                    />
                   </div>
                 </div>
                 {lockCheck.isLocked && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {lockCheck.message}{' '}
+                      {lockCheck.message}{" "}
                       <Link to="/adjustments" className="font-medium underline">
                         Go to Adjustments
                       </Link>
@@ -166,11 +210,18 @@ export default function PayoutsPage() {
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={addPayout.isPending || lockCheck.isLocked}>
-                    {addPayout.isPending ? 'Adding...' : 'Add Payout'}
+                  <Button
+                    type="submit"
+                    disabled={addPayout.isPending || lockCheck.isLocked}
+                  >
+                    {addPayout.isPending ? "Adding..." : "Add Payout"}
                   </Button>
                 </div>
               </form>
@@ -186,7 +237,9 @@ export default function PayoutsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Loading payouts...</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Loading payouts...
+            </div>
           ) : filteredPayouts.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               No payouts found. Add your first payout to get started.
@@ -204,10 +257,16 @@ export default function PayoutsPage() {
               <TableBody>
                 {filteredPayouts.map((payout, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{reps[Number(payout.repId)]?.name || 'Unknown'}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(Number(payout.amount))}</TableCell>
+                    <TableCell className="font-medium">
+                      {reps[Number(payout.repId)]?.name || "Unknown"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(Number(payout.amount))}
+                    </TableCell>
                     <TableCell>{formatDate(payout.date)}</TableCell>
-                    <TableCell className="text-muted-foreground">{payout.notes || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {payout.notes || "—"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

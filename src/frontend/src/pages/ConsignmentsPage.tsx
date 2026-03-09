@@ -1,26 +1,54 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Download, AlertCircle } from 'lucide-react';
-import { useConsignments, useAddConsignment, useReps, useProducts, useClosedSettlementPeriods } from '@/hooks/useQueries';
-import { generateCSV, downloadCSV, formatDate } from '@/lib/csv';
-import RepSelect from '@/components/RepSelect';
-import LineItemsEditor, { type LineItem } from '@/components/LineItemsEditor';
-import DateRangeFilter from '@/components/DateRangeFilter';
-import { checkSettlementLock } from '@/lib/settlementLock';
-import { Link } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import DateRangeFilter from "@/components/DateRangeFilter";
+import LineItemsEditor, { type LineItem } from "@/components/LineItemsEditor";
+import RepSelect from "@/components/RepSelect";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  useAddConsignment,
+  useClosedSettlementPeriods,
+  useConsignments,
+  useProducts,
+  useReps,
+} from "@/hooks/useQueries";
+import { downloadCSV, formatDate, generateCSV } from "@/lib/csv";
+import { checkSettlementLock } from "@/lib/settlementLock";
+import { Link } from "@tanstack/react-router";
+import { AlertCircle, Download, Plus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ConsignmentsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [repId, setRepId] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [items, setItems] = useState<LineItem[]>([{ productId: '', quantity: '1' }]);
+  const [repId, setRepId] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [items, setItems] = useState<LineItem[]>([
+    { productId: "", quantity: "1" },
+  ]);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
@@ -36,23 +64,26 @@ export default function ConsignmentsPage() {
     e.preventDefault();
 
     if (!repId) {
-      toast.error('Please select a rep');
+      toast.error("Please select a rep");
       return;
     }
 
-    if (items.length === 0 || items.some((item) => !item.productId || !item.quantity)) {
-      toast.error('Please add at least one complete line item');
+    if (
+      items.length === 0 ||
+      items.some((item) => !item.productId || !item.quantity)
+    ) {
+      toast.error("Please add at least one complete line item");
       return;
     }
 
     if (lockCheck.isLocked) {
-      toast.error('Cannot add consignment in closed settlement period');
+      toast.error("Cannot add consignment in closed settlement period");
       return;
     }
 
     try {
       const timestamp = BigInt(new Date(date).getTime() * 1_000_000);
-      
+
       for (const item of items) {
         await addConsignment.mutateAsync({
           repId: BigInt(repId),
@@ -62,28 +93,28 @@ export default function ConsignmentsPage() {
         });
       }
 
-      toast.success('Consignment added successfully');
-      setRepId('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setItems([{ productId: '', quantity: '1' }]);
+      toast.success("Consignment added successfully");
+      setRepId("");
+      setDate(new Date().toISOString().split("T")[0]);
+      setItems([{ productId: "", quantity: "1" }]);
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to add consignment';
+      const errorMessage = error?.message || "Failed to add consignment";
       toast.error(errorMessage);
       console.error(error);
     }
   };
 
   const exportConsignments = () => {
-    const headers = ['Rep', 'Product', 'Quantity', 'Date'];
+    const headers = ["Rep", "Product", "Quantity", "Date"];
     const rows = filteredConsignments.map((c) => [
-      reps[Number(c.repId)]?.name || 'Unknown',
-      products[Number(c.productId)]?.name || 'Unknown',
+      reps[Number(c.repId)]?.name || "Unknown",
+      products[Number(c.productId)]?.name || "Unknown",
       Number(c.quantity),
       formatDate(c.date),
     ]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('consignments.csv', csv);
+    downloadCSV("consignments.csv", csv);
   };
 
   const filteredConsignments = consignments.filter((c) => {
@@ -98,7 +129,9 @@ export default function ConsignmentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Consignments</h1>
-          <p className="text-muted-foreground">Track inventory consigned to reps</p>
+          <p className="text-muted-foreground">
+            Track inventory consigned to reps
+          </p>
         </div>
         <div className="flex gap-2">
           <DateRangeFilter
@@ -107,7 +140,12 @@ export default function ConsignmentsPage() {
             onStartDateChange={setStartDate}
             onEndDateChange={setEndDate}
           />
-          <Button variant="outline" size="sm" onClick={exportConsignments} disabled={filteredConsignments.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportConsignments}
+            disabled={filteredConsignments.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -121,7 +159,9 @@ export default function ConsignmentsPage() {
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Add New Consignment</DialogTitle>
-                <DialogDescription>Record items consigned to a rep</DialogDescription>
+                <DialogDescription>
+                  Record items consigned to a rep
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -131,14 +171,19 @@ export default function ConsignmentsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                    <Input
+                      id="date"
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                    />
                   </div>
                 </div>
                 {lockCheck.isLocked && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {lockCheck.message}{' '}
+                      {lockCheck.message}{" "}
                       <Link to="/adjustments" className="font-medium underline">
                         Go to Adjustments
                       </Link>
@@ -147,11 +192,18 @@ export default function ConsignmentsPage() {
                 )}
                 <LineItemsEditor items={items} onChange={setItems} />
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={addConsignment.isPending || lockCheck.isLocked}>
-                    {addConsignment.isPending ? 'Adding...' : 'Add Consignment'}
+                  <Button
+                    type="submit"
+                    disabled={addConsignment.isPending || lockCheck.isLocked}
+                  >
+                    {addConsignment.isPending ? "Adding..." : "Add Consignment"}
                   </Button>
                 </div>
               </form>
@@ -163,14 +215,24 @@ export default function ConsignmentsPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Consignments</CardTitle>
-          <CardDescription>View all consignment records</CardDescription>
+          <CardDescription>
+            Complete history of consigned inventory
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Loading consignments...</div>
-          ) : filteredConsignments.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              No consignments found. Add your first consignment to get started.
+              Loading consignments...
+            </div>
+          ) : filteredConsignments.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                No consignments found. Add your first consignment to start
+                tracking inventory.
+              </p>
+              <p className="text-xs text-muted-foreground italic">
+                Consignment clarity, in a single pane.
+              </p>
             </div>
           ) : (
             <Table>
@@ -185,9 +247,16 @@ export default function ConsignmentsPage() {
               <TableBody>
                 {filteredConsignments.map((consignment, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{reps[Number(consignment.repId)]?.name || 'Unknown'}</TableCell>
-                    <TableCell>{products[Number(consignment.productId)]?.name || 'Unknown'}</TableCell>
-                    <TableCell className="text-right">{Number(consignment.quantity)}</TableCell>
+                    <TableCell className="font-medium">
+                      {reps[Number(consignment.repId)]?.name || "Unknown"}
+                    </TableCell>
+                    <TableCell>
+                      {products[Number(consignment.productId)]?.name ||
+                        "Unknown"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {Number(consignment.quantity)}
+                    </TableCell>
                     <TableCell>{formatDate(consignment.date)}</TableCell>
                   </TableRow>
                 ))}

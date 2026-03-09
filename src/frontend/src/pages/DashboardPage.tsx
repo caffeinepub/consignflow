@@ -1,14 +1,37 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Settings } from 'lucide-react';
-import { useReps, useProducts, useSales, useReturns, usePayouts, useConsignments } from '@/hooks/useQueries';
-import { calculateRepBalances, calculateInventoryByRep } from '@/lib/calculations';
-import { generateCSV, downloadCSV, formatCurrency } from '@/lib/csv';
-import DateRangeFilter from '@/components/DateRangeFilter';
-import CommissionSettingsDialog from '@/components/CommissionSettingsDialog';
+import CommissionSettingsDialog from "@/components/CommissionSettingsDialog";
+import DateRangeFilter from "@/components/DateRangeFilter";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  useConsignments,
+  usePayouts,
+  useProducts,
+  useReps,
+  useReturns,
+  useSales,
+} from "@/hooks/useQueries";
+import {
+  calculateInventoryByRep,
+  calculateRepBalances,
+} from "@/lib/calculations";
+import { downloadCSV, formatCurrency, generateCSV } from "@/lib/csv";
+import { Download, Settings } from "lucide-react";
+import { useState } from "react";
 
 export default function DashboardPage() {
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -22,11 +45,34 @@ export default function DashboardPage() {
   const { data: payouts = [] } = usePayouts();
   const { data: consignments = [] } = useConsignments();
 
-  const balances = calculateRepBalances(reps, sales, returns, payouts, products, startDate || undefined, endDate || undefined);
-  const inventory = calculateInventoryByRep(reps, consignments, sales, returns, products, startDate || undefined, endDate || undefined);
+  const balances = calculateRepBalances(
+    reps,
+    sales,
+    returns,
+    payouts,
+    products,
+    startDate || undefined,
+    endDate || undefined,
+  );
+  const inventory = calculateInventoryByRep(
+    reps,
+    consignments,
+    sales,
+    returns,
+    products,
+    startDate || undefined,
+    endDate || undefined,
+  );
 
   const exportBalances = () => {
-    const headers = ['Rep', 'Total Sales', 'Total Returns', 'Total Payouts', 'Commission', 'Amount Owed'];
+    const headers = [
+      "Rep",
+      "Total Sales",
+      "Total Returns",
+      "Total Payouts",
+      "Commission",
+      "Amount Owed",
+    ];
     const rows = balances.map((b) => [
       b.repName,
       formatCurrency(b.totalSales),
@@ -36,14 +82,14 @@ export default function DashboardPage() {
       formatCurrency(b.amountOwed),
     ]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('rep-balances.csv', csv);
+    downloadCSV("rep-balances.csv", csv);
   };
 
   const exportInventory = () => {
-    const headers = ['Rep', 'Product', 'Quantity'];
+    const headers = ["Rep", "Product", "Quantity"];
     const rows = inventory.map((i) => [i.repName, i.productName, i.quantity]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('inventory-by-rep.csv', csv);
+    downloadCSV("inventory-by-rep.csv", csv);
   };
 
   return (
@@ -51,7 +97,9 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Overview of rep balances and inventory</p>
+          <p className="text-muted-foreground">
+            Overview of rep balances and inventory
+          </p>
         </div>
         <div className="flex gap-2">
           <DateRangeFilter
@@ -60,7 +108,11 @@ export default function DashboardPage() {
             onStartDateChange={setStartDate}
             onEndDateChange={setEndDate}
           />
-          <Button variant="outline" size="sm" onClick={() => setShowSettings(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSettings(true)}
+          >
             <Settings className="mr-2 h-4 w-4" />
             Commission Settings
           </Button>
@@ -79,7 +131,9 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Amount Owed by Rep</CardTitle>
-                  <CardDescription>Commission earned minus payouts made</CardDescription>
+                  <CardDescription>
+                    Commission earned minus payouts made
+                  </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={exportBalances}>
                   <Download className="mr-2 h-4 w-4" />
@@ -98,8 +152,12 @@ export default function DashboardPage() {
                     <TableRow>
                       <TableHead>Rep</TableHead>
                       <TableHead className="text-right">Total Sales</TableHead>
-                      <TableHead className="text-right">Total Returns</TableHead>
-                      <TableHead className="text-right">Total Payouts</TableHead>
+                      <TableHead className="text-right">
+                        Total Returns
+                      </TableHead>
+                      <TableHead className="text-right">
+                        Total Payouts
+                      </TableHead>
                       <TableHead className="text-right">Commission</TableHead>
                       <TableHead className="text-right">Amount Owed</TableHead>
                     </TableRow>
@@ -107,12 +165,24 @@ export default function DashboardPage() {
                   <TableBody>
                     {balances.map((balance) => (
                       <TableRow key={balance.repId}>
-                        <TableCell className="font-medium">{balance.repName}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(balance.totalSales)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(balance.totalReturns)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(balance.totalPayouts)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(balance.commission)}</TableCell>
-                        <TableCell className="text-right font-semibold">{formatCurrency(balance.amountOwed)}</TableCell>
+                        <TableCell className="font-medium">
+                          {balance.repName}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(balance.totalSales)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(balance.totalReturns)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(balance.totalPayouts)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(balance.commission)}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {formatCurrency(balance.amountOwed)}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -128,7 +198,9 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Inventory by Rep</CardTitle>
-                  <CardDescription>Current stock levels per rep and product</CardDescription>
+                  <CardDescription>
+                    Current stock levels per rep and product
+                  </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={exportInventory}>
                   <Download className="mr-2 h-4 w-4" />
@@ -139,7 +211,8 @@ export default function DashboardPage() {
             <CardContent>
               {inventory.length === 0 ? (
                 <div className="py-12 text-center text-sm text-muted-foreground">
-                  No inventory data available. Add consignments to see inventory.
+                  No inventory data available. Add consignments to see
+                  inventory.
                 </div>
               ) : (
                 <Table>
@@ -153,9 +226,13 @@ export default function DashboardPage() {
                   <TableBody>
                     {inventory.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{item.repName}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.repName}
+                        </TableCell>
                         <TableCell>{item.productName}</TableCell>
-                        <TableCell className="text-right">{item.quantity}</TableCell>
+                        <TableCell className="text-right">
+                          {item.quantity}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -166,7 +243,10 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
 
-      <CommissionSettingsDialog open={showSettings} onOpenChange={setShowSettings} />
+      <CommissionSettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
+      />
     </div>
   );
 }

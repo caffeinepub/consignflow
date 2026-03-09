@@ -1,9 +1,13 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "lucide-react";
+import { useState } from "react";
 
 interface DateRangeFilterProps {
   startDate: Date | null;
@@ -12,12 +16,17 @@ interface DateRangeFilterProps {
   onEndDateChange: (date: Date | null) => void;
 }
 
-export default function DateRangeFilter({ startDate, endDate, onStartDateChange, onEndDateChange }: DateRangeFilterProps) {
+export default function DateRangeFilter({
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
+}: DateRangeFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const formatDateForInput = (date: Date | null) => {
-    if (!date) return '';
-    return date.toISOString().split('T')[0];
+    if (!date) return "";
+    return date.toISOString().split("T")[0];
   };
 
   const handleStartChange = (value: string) => {
@@ -39,7 +48,7 @@ export default function DateRangeFilter({ startDate, endDate, onStartDateChange,
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm">
           <Calendar className="mr-2 h-4 w-4" />
-          {startDate || endDate ? 'Date Range Set' : 'Filter by Date'}
+          {startDate || endDate ? "Date Range Set" : "Filter by Date"}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
@@ -63,10 +72,19 @@ export default function DateRangeFilter({ startDate, endDate, onStartDateChange,
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={clearDates} className="flex-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearDates}
+              className="flex-1"
+            >
               Clear
             </Button>
-            <Button size="sm" onClick={() => setIsOpen(false)} className="flex-1">
+            <Button
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="flex-1"
+            >
               Apply
             </Button>
           </div>

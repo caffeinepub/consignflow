@@ -1,5 +1,11 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useProducts } from '@/hooks/useQueries';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useProducts } from "@/hooks/useQueries";
 
 interface ProductSelectProps {
   value: string;
@@ -7,7 +13,11 @@ interface ProductSelectProps {
   placeholder?: string;
 }
 
-export default function ProductSelect({ value, onValueChange, placeholder = 'Select product' }: ProductSelectProps) {
+export default function ProductSelect({
+  value,
+  onValueChange,
+  placeholder = "Select product",
+}: ProductSelectProps) {
   const { data: products, isLoading } = useProducts();
 
   if (isLoading) {

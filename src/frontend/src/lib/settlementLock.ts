@@ -1,4 +1,4 @@
-import type { SettlementPeriodView } from '../backend';
+import type { SettlementPeriodView } from "../backend";
 
 export interface LockCheckResult {
   isLocked: boolean;
@@ -8,7 +8,7 @@ export interface LockCheckResult {
 
 export function checkSettlementLock(
   date: Date,
-  closedPeriods: SettlementPeriodView[]
+  closedPeriods: SettlementPeriodView[],
 ): LockCheckResult {
   const timestamp = date.getTime();
 
@@ -30,5 +30,9 @@ export function checkSettlementLock(
 
 export function formatSettlementPeriodDate(timestamp: bigint): string {
   const date = new Date(Number(timestamp) / 1_000_000);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }

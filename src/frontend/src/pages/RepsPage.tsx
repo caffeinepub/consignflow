@@ -1,56 +1,76 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Download, Search } from 'lucide-react';
-import { useReps, useAddRep } from '@/hooks/useQueries';
-import { generateCSV, downloadCSV } from '@/lib/csv';
-import { getCommissionSettings } from '@/lib/commissionSettings';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useAddRep, useReps } from "@/hooks/useQueries";
+import { getCommissionSettings } from "@/lib/commissionSettings";
+import { downloadCSV, generateCSV } from "@/lib/csv";
+import { Download, Plus, Search } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RepsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [name, setName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: reps = [], isLoading } = useReps();
   const addRep = useAddRep();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
-      toast.error('Rep name is required');
+      toast.error("Rep name is required");
       return;
     }
 
     try {
       await addRep.mutateAsync({ name: name.trim() });
-      toast.success('Rep added successfully');
-      setName('');
+      toast.success("Rep added successfully");
+      setName("");
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error('Failed to add rep');
+      toast.error("Failed to add rep");
       console.error(error);
     }
   };
 
   const exportReps = () => {
     const settings = getCommissionSettings();
-    const headers = ['Name', 'Commission Rate (%)'];
+    const headers = ["Name", "Commission Rate (%)"];
     const rows = reps.map((r, index) => [
       r.name,
       settings.repOverrides[index] ?? settings.defaultCommission,
     ]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('reps.csv', csv);
+    downloadCSV("reps.csv", csv);
   };
 
   const filteredReps = reps.filter((r) =>
-    r.name.toLowerCase().includes(searchTerm.toLowerCase())
+    r.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -58,10 +78,17 @@ export default function RepsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Sales Reps</h1>
-          <p className="text-muted-foreground">Manage your sales representatives</p>
+          <p className="text-muted-foreground">
+            Manage your sales representatives
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportReps} disabled={reps.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportReps}
+            disabled={reps.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -75,7 +102,9 @@ export default function RepsPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Rep</DialogTitle>
-                <DialogDescription>Enter the rep details below</DialogDescription>
+                <DialogDescription>
+                  Enter the rep details below
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -88,11 +117,15 @@ export default function RepsPage() {
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={addRep.isPending}>
-                    {addRep.isPending ? 'Adding...' : 'Add Rep'}
+                    {addRep.isPending ? "Adding..." : "Add Rep"}
                   </Button>
                 </div>
               </form>
@@ -118,10 +151,21 @@ export default function RepsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Loading reps...</div>
-          ) : filteredReps.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              {searchTerm ? 'No reps match your search.' : 'No reps yet. Add your first rep to get started.'}
+              Loading reps...
+            </div>
+          ) : filteredReps.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                {searchTerm
+                  ? "No reps match your search."
+                  : "No reps yet. Add your first rep to get started."}
+              </p>
+              {!searchTerm && (
+                <p className="text-xs text-muted-foreground italic">
+                  From handshake to payout, without losing the thread.
+                </p>
+              )}
             </div>
           ) : (
             <Table>

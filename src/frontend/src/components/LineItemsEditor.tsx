@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Trash2, Plus } from 'lucide-react';
-import ProductSelect from './ProductSelect';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus, Trash2 } from "lucide-react";
+import ProductSelect from "./ProductSelect";
 
 export interface LineItem {
   productId: string;
@@ -16,9 +16,20 @@ interface LineItemsEditorProps {
   showUnitPrice?: boolean;
 }
 
-export default function LineItemsEditor({ items, onChange, showUnitPrice = false }: LineItemsEditorProps) {
+export default function LineItemsEditor({
+  items,
+  onChange,
+  showUnitPrice = false,
+}: LineItemsEditorProps) {
   const addItem = () => {
-    onChange([...items, { productId: '', quantity: '1', unitPrice: showUnitPrice ? '' : undefined }]);
+    onChange([
+      ...items,
+      {
+        productId: "",
+        quantity: "1",
+        unitPrice: showUnitPrice ? "" : undefined,
+      },
+    ]);
   };
 
   const removeItem = (index: number) => {
@@ -49,11 +60,19 @@ export default function LineItemsEditor({ items, onChange, showUnitPrice = false
 
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={index} className="flex gap-3 rounded-lg border border-border p-4">
+          <div
+            key={index}
+            className="flex gap-3 rounded-lg border border-border p-4"
+          >
             <div className="flex-1 space-y-3">
               <div>
                 <Label className="text-xs">Product</Label>
-                <ProductSelect value={item.productId} onValueChange={(value) => updateItem(index, 'productId', value)} />
+                <ProductSelect
+                  value={item.productId}
+                  onValueChange={(value) =>
+                    updateItem(index, "productId", value)
+                  }
+                />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -62,7 +81,9 @@ export default function LineItemsEditor({ items, onChange, showUnitPrice = false
                     type="number"
                     min="1"
                     value={item.quantity}
-                    onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(index, "quantity", e.target.value)
+                    }
                     placeholder="0"
                   />
                 </div>
@@ -74,14 +95,22 @@ export default function LineItemsEditor({ items, onChange, showUnitPrice = false
                       min="0"
                       step="0.01"
                       value={item.unitPrice}
-                      onChange={(e) => updateItem(index, 'unitPrice', e.target.value)}
+                      onChange={(e) =>
+                        updateItem(index, "unitPrice", e.target.value)
+                      }
                       placeholder="0.00"
                     />
                   </div>
                 )}
               </div>
             </div>
-            <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(index)} className="mt-6">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => removeItem(index)}
+              className="mt-6"
+            >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>

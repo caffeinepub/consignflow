@@ -1,23 +1,43 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
-import { useAdjustments, useAddAdjustment, useReps } from '@/hooks/useQueries';
-import { formatDate, formatCurrency } from '@/lib/csv';
-import RepSelect from '@/components/RepSelect';
-import { toast } from 'sonner';
+import RepSelect from "@/components/RepSelect";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { useAddAdjustment, useAdjustments, useReps } from "@/hooks/useQueries";
+import { formatCurrency, formatDate } from "@/lib/csv";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function AdjustmentsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [repId, setRepId] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [notes, setNotes] = useState('');
+  const [repId, setRepId] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [notes, setNotes] = useState("");
 
   const { data: adjustments = [], isLoading } = useAdjustments();
   const { data: reps = [] } = useReps();
@@ -27,18 +47,18 @@ export default function AdjustmentsPage() {
     e.preventDefault();
 
     if (!repId) {
-      toast.error('Please select a rep');
+      toast.error("Please select a rep");
       return;
     }
 
-    const amountValue = parseFloat(amount);
-    if (isNaN(amountValue)) {
-      toast.error('Please enter a valid amount');
+    const amountValue = Number.parseFloat(amount);
+    if (Number.isNaN(amountValue)) {
+      toast.error("Please enter a valid amount");
       return;
     }
 
     if (!notes.trim()) {
-      toast.error('Please provide a reason for this adjustment');
+      toast.error("Please provide a reason for this adjustment");
       return;
     }
 
@@ -50,27 +70,31 @@ export default function AdjustmentsPage() {
         notes: notes.trim(),
       });
 
-      toast.success('Adjustment added successfully');
-      setRepId('');
-      setAmount('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setNotes('');
+      toast.success("Adjustment added successfully");
+      setRepId("");
+      setAmount("");
+      setDate(new Date().toISOString().split("T")[0]);
+      setNotes("");
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to add adjustment';
+      const errorMessage = error?.message || "Failed to add adjustment";
       toast.error(errorMessage);
       console.error(error);
     }
   };
 
-  const sortedAdjustments = [...adjustments].sort((a, b) => Number(b.date - a.date));
+  const sortedAdjustments = [...adjustments].sort((a, b) =>
+    Number(b.date - a.date),
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Adjustments</h1>
-          <p className="text-muted-foreground">Record adjustments for closed settlement periods</p>
+          <p className="text-muted-foreground">
+            Record adjustments for closed settlement periods
+          </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -82,7 +106,9 @@ export default function AdjustmentsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Adjustment</DialogTitle>
-              <DialogDescription>Record an adjustment for a closed settlement period</DialogDescription>
+              <DialogDescription>
+                Record an adjustment for a closed settlement period
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -101,7 +127,9 @@ export default function AdjustmentsPage() {
                     placeholder="0.00"
                     required
                   />
-                  <p className="text-xs text-muted-foreground">Use negative values for deductions</p>
+                  <p className="text-xs text-muted-foreground">
+                    Use negative values for deductions
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="date">Date</Label>
@@ -126,11 +154,15 @@ export default function AdjustmentsPage() {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={addAdjustment.isPending}>
-                  {addAdjustment.isPending ? 'Adding...' : 'Add Adjustment'}
+                  {addAdjustment.isPending ? "Adding..." : "Add Adjustment"}
                 </Button>
               </div>
             </form>
@@ -145,7 +177,9 @@ export default function AdjustmentsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Loading adjustments...</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Loading adjustments...
+            </div>
           ) : sortedAdjustments.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               No adjustments found. Add your first adjustment to get started.
@@ -163,10 +197,16 @@ export default function AdjustmentsPage() {
               <TableBody>
                 {sortedAdjustments.map((adjustment, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{reps[Number(adjustment.repId)]?.name || 'Unknown'}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(Number(adjustment.amount))}</TableCell>
+                    <TableCell className="font-medium">
+                      {reps[Number(adjustment.repId)]?.name || "Unknown"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(Number(adjustment.amount))}
+                    </TableCell>
                     <TableCell>{formatDate(adjustment.date)}</TableCell>
-                    <TableCell className="text-muted-foreground">{adjustment.notes}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {adjustment.notes}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

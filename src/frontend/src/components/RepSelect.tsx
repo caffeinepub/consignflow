@@ -1,5 +1,11 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useReps } from '@/hooks/useQueries';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useReps } from "@/hooks/useQueries";
 
 interface RepSelectProps {
   value: string;
@@ -7,7 +13,11 @@ interface RepSelectProps {
   placeholder?: string;
 }
 
-export default function RepSelect({ value, onValueChange, placeholder = 'Select rep' }: RepSelectProps) {
+export default function RepSelect({
+  value,
+  onValueChange,
+  placeholder = "Select rep",
+}: RepSelectProps) {
   const { data: reps, isLoading } = useReps();
 
   if (isLoading) {

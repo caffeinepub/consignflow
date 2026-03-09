@@ -1,26 +1,59 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Download, AlertCircle } from 'lucide-react';
-import { useSales, useAddSale, useReps, useProducts, useClosedSettlementPeriods } from '@/hooks/useQueries';
-import { generateCSV, downloadCSV, formatDate, formatCurrency } from '@/lib/csv';
-import RepSelect from '@/components/RepSelect';
-import LineItemsEditor, { type LineItem } from '@/components/LineItemsEditor';
-import DateRangeFilter from '@/components/DateRangeFilter';
-import { checkSettlementLock } from '@/lib/settlementLock';
-import { Link } from '@tanstack/react-router';
-import { toast } from 'sonner';
+import DateRangeFilter from "@/components/DateRangeFilter";
+import LineItemsEditor, { type LineItem } from "@/components/LineItemsEditor";
+import RepSelect from "@/components/RepSelect";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  useAddSale,
+  useClosedSettlementPeriods,
+  useProducts,
+  useReps,
+  useSales,
+} from "@/hooks/useQueries";
+import {
+  downloadCSV,
+  formatCurrency,
+  formatDate,
+  generateCSV,
+} from "@/lib/csv";
+import { checkSettlementLock } from "@/lib/settlementLock";
+import { Link } from "@tanstack/react-router";
+import { AlertCircle, Download, Plus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SalesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [repId, setRepId] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [items, setItems] = useState<LineItem[]>([{ productId: '', quantity: '1', unitPrice: '' }]);
+  const [repId, setRepId] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [items, setItems] = useState<LineItem[]>([
+    { productId: "", quantity: "1", unitPrice: "" },
+  ]);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
@@ -36,57 +69,69 @@ export default function SalesPage() {
     e.preventDefault();
 
     if (!repId) {
-      toast.error('Please select a rep');
+      toast.error("Please select a rep");
       return;
     }
 
-    if (items.length === 0 || items.some((item) => !item.productId || !item.quantity || !item.unitPrice)) {
-      toast.error('Please add at least one complete line item');
+    if (
+      items.length === 0 ||
+      items.some((item) => !item.productId || !item.quantity || !item.unitPrice)
+    ) {
+      toast.error("Please add at least one complete line item");
       return;
     }
 
     if (lockCheck.isLocked) {
-      toast.error('Cannot add sale in closed settlement period');
+      toast.error("Cannot add sale in closed settlement period");
       return;
     }
 
     try {
       const timestamp = BigInt(new Date(date).getTime() * 1_000_000);
-      
+
       for (const item of items) {
         await addSale.mutateAsync({
           repId: BigInt(repId),
           productId: BigInt(item.productId),
           quantity: BigInt(item.quantity),
-          unitPrice: BigInt(Math.round(parseFloat(item.unitPrice!) * 100)),
+          unitPrice: BigInt(
+            Math.round(Number.parseFloat(item.unitPrice!) * 100),
+          ),
           date: timestamp,
         });
       }
 
-      toast.success('Sale added successfully');
-      setRepId('');
-      setDate(new Date().toISOString().split('T')[0]);
-      setItems([{ productId: '', quantity: '1', unitPrice: '' }]);
+      toast.success("Sale added successfully");
+      setRepId("");
+      setDate(new Date().toISOString().split("T")[0]);
+      setItems([{ productId: "", quantity: "1", unitPrice: "" }]);
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to add sale';
+      const errorMessage = error?.message || "Failed to add sale";
       toast.error(errorMessage);
       console.error(error);
     }
   };
 
   const exportSales = () => {
-    const headers = ['Rep', 'Product', 'Quantity', 'Unit Price', 'Total', 'Date'];
+    const headers = [
+      "Rep",
+      "Product",
+      "Quantity",
+      "Unit Price",
+      "Total",
+      "Date",
+    ];
     const rows = filteredSales.map((s) => [
-      reps[Number(s.repId)]?.name || 'Unknown',
-      products[Number(s.productId)]?.name || 'Unknown',
+      reps[Number(s.repId)]?.name || "Unknown",
+      products[Number(s.productId)]?.name || "Unknown",
       Number(s.quantity),
       formatCurrency(Number(s.unitPrice)),
       formatCurrency(Number(s.unitPrice) * Number(s.quantity)),
       formatDate(s.date),
     ]);
     const csv = generateCSV(headers, rows);
-    downloadCSV('sales.csv', csv);
+    downloadCSV("sales.csv", csv);
   };
 
   const filteredSales = sales.filter((s) => {
@@ -110,7 +155,12 @@ export default function SalesPage() {
             onStartDateChange={setStartDate}
             onEndDateChange={setEndDate}
           />
-          <Button variant="outline" size="sm" onClick={exportSales} disabled={filteredSales.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportSales}
+            disabled={filteredSales.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -124,7 +174,9 @@ export default function SalesPage() {
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Add New Sale</DialogTitle>
-                <DialogDescription>Record a sales transaction</DialogDescription>
+                <DialogDescription>
+                  Record a sales transaction
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -134,27 +186,43 @@ export default function SalesPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                    <Input
+                      id="date"
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                    />
                   </div>
                 </div>
                 {lockCheck.isLocked && (
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {lockCheck.message}{' '}
+                      {lockCheck.message}{" "}
                       <Link to="/adjustments" className="font-medium underline">
                         Go to Adjustments
                       </Link>
                     </AlertDescription>
                   </Alert>
                 )}
-                <LineItemsEditor items={items} onChange={setItems} showUnitPrice />
+                <LineItemsEditor
+                  items={items}
+                  onChange={setItems}
+                  showUnitPrice
+                />
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={addSale.isPending || lockCheck.isLocked}>
-                    {addSale.isPending ? 'Adding...' : 'Add Sale'}
+                  <Button
+                    type="submit"
+                    disabled={addSale.isPending || lockCheck.isLocked}
+                  >
+                    {addSale.isPending ? "Adding..." : "Add Sale"}
                   </Button>
                 </div>
               </form>
@@ -170,7 +238,9 @@ export default function SalesPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="py-12 text-center text-sm text-muted-foreground">Loading sales...</div>
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Loading sales...
+            </div>
           ) : filteredSales.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
               No sales found. Add your first sale to get started.
@@ -190,11 +260,23 @@ export default function SalesPage() {
               <TableBody>
                 {filteredSales.map((sale, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{reps[Number(sale.repId)]?.name || 'Unknown'}</TableCell>
-                    <TableCell>{products[Number(sale.productId)]?.name || 'Unknown'}</TableCell>
-                    <TableCell className="text-right">{Number(sale.quantity)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(Number(sale.unitPrice))}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(Number(sale.unitPrice) * Number(sale.quantity))}</TableCell>
+                    <TableCell className="font-medium">
+                      {reps[Number(sale.repId)]?.name || "Unknown"}
+                    </TableCell>
+                    <TableCell>
+                      {products[Number(sale.productId)]?.name || "Unknown"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {Number(sale.quantity)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(Number(sale.unitPrice))}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(
+                        Number(sale.unitPrice) * Number(sale.quantity),
+                      )}
+                    </TableCell>
                     <TableCell>{formatDate(sale.date)}</TableCell>
                   </TableRow>
                 ))}
