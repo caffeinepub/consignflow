@@ -37,6 +37,7 @@ export default function ProductSelect({
       </SelectTrigger>
       <SelectContent>
         {products?.map((product, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: index is the product ID
           <SelectItem key={index} value={String(index)}>
             {product.name} - ${(Number(product.price) / 100).toFixed(2)}
           </SelectItem>

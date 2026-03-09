@@ -41,18 +41,15 @@ export default function ProductsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!name.trim()) {
       toast.error("Product name is required");
       return;
     }
-
     const priceValue = Number.parseFloat(price);
     if (Number.isNaN(priceValue) || priceValue < 0) {
       toast.error("Please enter a valid price");
       return;
     }
-
     try {
       await addProduct.mutateAsync({
         name: name.trim(),
@@ -71,8 +68,7 @@ export default function ProductsPage() {
   const exportProducts = () => {
     const headers = ["Name", "Price"];
     const rows = products.map((p) => [p.name, formatCurrency(Number(p.price))]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("products.csv", csv);
+    downloadCSV("products.csv", generateCSV(headers, rows));
   };
 
   const filteredProducts = products.filter((p) =>
@@ -93,14 +89,12 @@ export default function ProductsPage() {
             onClick={exportProducts}
             disabled={products.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Product
+                <Plus className="mr-2 h-4 w-4" /> Add Product
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -193,6 +187,7 @@ export default function ProductsPage() {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {product.name}

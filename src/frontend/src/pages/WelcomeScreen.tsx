@@ -41,6 +41,7 @@ export default function WelcomeScreen() {
         <CardContent className="space-y-6">
           <ul className="space-y-4">
             {capabilities.map((capability, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list
               <li key={index} className="flex items-start gap-3">
                 <CheckCircle className="h-6 w-6 shrink-0 text-primary mt-0.5" />
                 <span className="text-base leading-relaxed">{capability}</span>

@@ -9,39 +9,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { Clock, Heart, LogOut, User } from "lucide-react";
+import { useState } from "react";
+import { CommandPalette } from "./CommandPalette";
 import {
-  ArrowLeftRight,
-  Calendar,
-  DollarSign,
-  Edit3,
-  FileText,
-  Heart,
-  LayoutDashboard,
-  LogOut,
-  Package,
-  TrendingDown,
-  TrendingUp,
-  User,
-  Users,
-} from "lucide-react";
+  GlobalSidebar,
+  MobileBottomNav,
+  useSidebarState,
+} from "./GlobalSidebar";
+import { SystemTimeline } from "./SystemTimeline";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Products", href: "/products", icon: Package },
-  { name: "Reps", href: "/reps", icon: Users },
-  { name: "Consignments", href: "/consignments", icon: TrendingUp },
-  { name: "Sales", href: "/sales", icon: ArrowLeftRight },
-  { name: "Returns", href: "/returns", icon: TrendingDown },
-  { name: "Payouts", href: "/payouts", icon: DollarSign },
-  { name: "Statements", href: "/statements", icon: FileText },
-  { name: "Settlement Periods", href: "/settlement-periods", icon: Calendar },
-  { name: "Adjustments", href: "/adjustments", icon: Edit3 },
-];
 
 /** Shorten a principal string for display: first 5 chars … last 3 chars */
 function shortPrincipal(p: string | null): string {
@@ -51,9 +32,7 @@ function shortPrincipal(p: string | null): string {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const routerState = useRouterState();
   const navigate = useNavigate();
-  const currentPath = routerState.location.pathname;
   const currentYear = new Date().getFullYear();
   const appIdentifier =
     typeof window !== "undefined"
@@ -61,6 +40,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       : "consignflow";
 
   const { principalId, logout } = useAuth();
+  const { collapsed, toggle } = useSidebarState();
+  const [timelineOpen, setTimelineOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -69,17 +50,54 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card print:hidden">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Package className="h-6 w-6" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight">
-                ConsignFlow
-              </span>
-            </Link>
+      {/* Sidebar (desktop) */}
+      <div className="hidden md:block">
+        <GlobalSidebar collapsed={collapsed} onToggle={toggle} />
+      </div>
+
+      {/* System Timeline Drawer */}
+      <SystemTimeline
+        open={timelineOpen}
+        onClose={() => setTimelineOpen(false)}
+      />
+
+      {/* Main area wrapper */}
+      <div
+        className={cn(
+          "flex min-h-screen flex-col transition-[margin] duration-200 ease-in-out",
+          "md:ml-16",
+          !collapsed && "md:ml-60",
+        )}
+      >
+        {/* Top header */}
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 print:hidden">
+          <div className="flex items-center gap-3">
+            {/* Mobile: logo */}
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground md:hidden">
+              <span className="text-xs font-bold">CF</span>
+            </div>
+            <span className="text-sm font-bold tracking-tight md:hidden">
+              ConsignFlow
+            </span>
+
+            {/* Desktop: search/command */}
+            <div className="hidden md:block">
+              <CommandPalette />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Timeline toggle */}
+            <Button
+              data-ocid="header.timeline.button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setTimelineOpen((o) => !o)}
+              title="Activity timeline (T)"
+            >
+              <Clock className="h-4 w-4" />
+            </Button>
 
             {/* User menu */}
             <DropdownMenu>
@@ -88,7 +106,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   data-ocid="header.user.button"
                   variant="outline"
                   size="sm"
-                  className="gap-2 max-w-[180px]"
+                  className="gap-2 max-w-[160px]"
                 >
                   <User className="h-4 w-4 shrink-0" />
                   <span className="truncate text-xs font-mono">
@@ -115,51 +133,30 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <nav className="border-b border-border bg-card/50 print:hidden">
-        <div className="container mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentPath === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors",
-                    isActive
-                      ? "border-primary text-primary"
-                      : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.name}
-                </Link>
-              );
-            })}
+        {/* Page content */}
+        <main className="flex-1 px-4 py-8 pb-20 md:pb-8">{children}</main>
+
+        {/* Footer */}
+        <footer className="border-t border-border bg-card/50 py-6 print:hidden">
+          <div className="px-4 text-center text-sm text-muted-foreground">
+            © {currentYear}. Built with{" "}
+            <Heart className="inline h-4 w-4 text-accent fill-accent" /> using{" "}
+            <a
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appIdentifier}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground hover:text-primary transition-colors"
+            >
+              caffeine.ai
+            </a>
           </div>
-        </div>
-      </nav>
+        </footer>
+      </div>
 
-      <main className="container mx-auto px-4 py-8">{children}</main>
-
-      <footer className="mt-16 border-t border-border bg-card/50 py-8 print:hidden">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © {currentYear}. Built with{" "}
-          <Heart className="inline h-4 w-4 text-accent fill-accent" /> using{" "}
-          <a
-            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${appIdentifier}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-foreground hover:text-primary transition-colors"
-          >
-            caffeine.ai
-          </a>
-        </div>
-      </footer>
+      {/* Mobile bottom nav */}
+      <MobileBottomNav />
     </div>
   );
 }

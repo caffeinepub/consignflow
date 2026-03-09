@@ -64,23 +64,19 @@ export default function PayoutsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!repId) {
       toast.error("Please select a rep");
       return;
     }
-
     const amountValue = Number.parseFloat(amount);
     if (Number.isNaN(amountValue) || amountValue < 0) {
       toast.error("Please enter a valid amount");
       return;
     }
-
     if (lockCheck.isLocked) {
       toast.error("Cannot add payout in closed settlement period");
       return;
     }
-
     try {
       await addPayout.mutateAsync({
         repId: BigInt(repId),
@@ -88,7 +84,6 @@ export default function PayoutsPage() {
         date: BigInt(new Date(date).getTime() * 1_000_000),
         notes: notes.trim(),
       });
-
       toast.success("Payout added successfully");
       setRepId("");
       setAmount("");
@@ -96,8 +91,7 @@ export default function PayoutsPage() {
       setNotes("");
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || "Failed to add payout";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Failed to add payout");
       console.error(error);
     }
   };
@@ -110,15 +104,12 @@ export default function PayoutsPage() {
       formatDate(p.date),
       p.notes,
     ]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("payouts.csv", csv);
+    downloadCSV("payouts.csv", generateCSV(headers, rows));
   };
 
   const filteredPayouts = payouts.filter((p) => {
-    const date = new Date(Number(p.date) / 1_000_000);
-    const matchesStart = !startDate || date >= startDate;
-    const matchesEnd = !endDate || date <= endDate;
-    return matchesStart && matchesEnd;
+    const d = new Date(Number(p.date) / 1_000_000);
+    return (!startDate || d >= startDate) && (!endDate || d <= endDate);
   });
 
   return (
@@ -143,14 +134,12 @@ export default function PayoutsPage() {
             onClick={exportPayouts}
             disabled={filteredPayouts.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Payout
+                <Plus className="mr-2 h-4 w-4" /> Add Payout
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -256,6 +245,7 @@ export default function PayoutsPage() {
               </TableHeader>
               <TableBody>
                 {filteredPayouts.map((payout, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {reps[Number(payout.repId)]?.name || "Unknown"}

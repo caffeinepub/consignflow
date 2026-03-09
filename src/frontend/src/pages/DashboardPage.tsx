@@ -81,15 +81,13 @@ export default function DashboardPage() {
       formatCurrency(b.commission),
       formatCurrency(b.amountOwed),
     ]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("rep-balances.csv", csv);
+    downloadCSV("rep-balances.csv", generateCSV(headers, rows));
   };
 
   const exportInventory = () => {
     const headers = ["Rep", "Product", "Quantity"];
     const rows = inventory.map((i) => [i.repName, i.productName, i.quantity]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("inventory-by-rep.csv", csv);
+    downloadCSV("inventory-by-rep.csv", generateCSV(headers, rows));
   };
 
   return (
@@ -113,8 +111,7 @@ export default function DashboardPage() {
             size="sm"
             onClick={() => setShowSettings(true)}
           >
-            <Settings className="mr-2 h-4 w-4" />
-            Commission Settings
+            <Settings className="mr-2 h-4 w-4" /> Commission Settings
           </Button>
         </div>
       </div>
@@ -136,8 +133,7 @@ export default function DashboardPage() {
                   </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={exportBalances}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Export CSV
+                  <Download className="mr-2 h-4 w-4" /> Export CSV
                 </Button>
               </div>
             </CardHeader>
@@ -203,8 +199,7 @@ export default function DashboardPage() {
                   </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" onClick={exportInventory}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Export CSV
+                  <Download className="mr-2 h-4 w-4" /> Export CSV
                 </Button>
               </div>
             </CardHeader>
@@ -225,6 +220,7 @@ export default function DashboardPage() {
                   </TableHeader>
                   <TableBody>
                     {inventory.map((item, index) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                       <TableRow key={index}>
                         <TableCell className="font-medium">
                           {item.repName}

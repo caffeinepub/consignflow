@@ -41,12 +41,10 @@ export default function RepsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!name.trim()) {
       toast.error("Rep name is required");
       return;
     }
-
     try {
       await addRep.mutateAsync({ name: name.trim() });
       toast.success("Rep added successfully");
@@ -65,8 +63,7 @@ export default function RepsPage() {
       r.name,
       settings.repOverrides[index] ?? settings.defaultCommission,
     ]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("reps.csv", csv);
+    downloadCSV("reps.csv", generateCSV(headers, rows));
   };
 
   const filteredReps = reps.filter((r) =>
@@ -89,14 +86,12 @@ export default function RepsPage() {
             onClick={exportReps}
             disabled={reps.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Rep
+                <Plus className="mr-2 h-4 w-4" /> Add Rep
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -176,6 +171,7 @@ export default function RepsPage() {
               </TableHeader>
               <TableBody>
                 {filteredReps.map((rep, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">{rep.name}</TableCell>
                   </TableRow>

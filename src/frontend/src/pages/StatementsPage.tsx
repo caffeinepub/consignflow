@@ -107,10 +107,6 @@ export default function StatementsPage() {
     );
   });
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const years = Array.from({ length: 5 }, (_, i) => currentMonth.year - 2 + i);
   const months = [
     "January",
@@ -157,6 +153,7 @@ export default function StatementsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {reps.map((rep, index) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: index is rep ID
                     <SelectItem key={index} value={String(index)}>
                       {rep.name}
                     </SelectItem>
@@ -172,6 +169,7 @@ export default function StatementsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {months.map((m, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: stable month index
                     <SelectItem key={i} value={String(i)}>
                       {m}
                     </SelectItem>
@@ -196,7 +194,7 @@ export default function StatementsPage() {
             </div>
           </div>
           <div className="mt-4 flex justify-end">
-            <Button onClick={handlePrint} disabled={!selectedRep}>
+            <Button onClick={() => window.print()} disabled={!selectedRep}>
               <Printer className="mr-2 h-4 w-4" />
               Print Statement
             </Button>
@@ -240,6 +238,7 @@ export default function StatementsPage() {
                     </TableHeader>
                     <TableBody>
                       {repSales.map((sale, index) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                         <TableRow key={index}>
                           <TableCell>{formatDate(sale.date)}</TableCell>
                           <TableCell>
@@ -281,6 +280,7 @@ export default function StatementsPage() {
                     </TableHeader>
                     <TableBody>
                       {repReturns.map((returnItem, index) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                         <TableRow key={index}>
                           <TableCell>{formatDate(returnItem.date)}</TableCell>
                           <TableCell>
@@ -314,6 +314,7 @@ export default function StatementsPage() {
                     </TableHeader>
                     <TableBody>
                       {repPayouts.map((payout, index) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                         <TableRow key={index}>
                           <TableCell>{formatDate(payout.date)}</TableCell>
                           <TableCell className="text-right">

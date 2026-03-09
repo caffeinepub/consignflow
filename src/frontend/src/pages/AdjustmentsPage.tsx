@@ -45,23 +45,19 @@ export default function AdjustmentsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!repId) {
       toast.error("Please select a rep");
       return;
     }
-
     const amountValue = Number.parseFloat(amount);
     if (Number.isNaN(amountValue)) {
       toast.error("Please enter a valid amount");
       return;
     }
-
     if (!notes.trim()) {
       toast.error("Please provide a reason for this adjustment");
       return;
     }
-
     try {
       await addAdjustment.mutateAsync({
         repId: BigInt(repId),
@@ -69,7 +65,6 @@ export default function AdjustmentsPage() {
         date: BigInt(new Date(date).getTime() * 1_000_000),
         notes: notes.trim(),
       });
-
       toast.success("Adjustment added successfully");
       setRepId("");
       setAmount("");
@@ -77,8 +72,7 @@ export default function AdjustmentsPage() {
       setNotes("");
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || "Failed to add adjustment";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Failed to add adjustment");
       console.error(error);
     }
   };
@@ -99,8 +93,7 @@ export default function AdjustmentsPage() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Adjustment
+              <Plus className="mr-2 h-4 w-4" /> Add Adjustment
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -196,6 +189,7 @@ export default function AdjustmentsPage() {
               </TableHeader>
               <TableBody>
                 {sortedAdjustments.map((adjustment, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {reps[Number(adjustment.repId)]?.name || "Unknown"}

@@ -62,12 +62,10 @@ export default function ReturnsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!repId) {
       toast.error("Please select a rep");
       return;
     }
-
     if (
       items.length === 0 ||
       items.some((item) => !item.productId || !item.quantity)
@@ -75,15 +73,12 @@ export default function ReturnsPage() {
       toast.error("Please add at least one complete line item");
       return;
     }
-
     if (lockCheck.isLocked) {
       toast.error("Cannot add return in closed settlement period");
       return;
     }
-
     try {
       const timestamp = BigInt(new Date(date).getTime() * 1_000_000);
-
       for (const item of items) {
         await addReturn.mutateAsync({
           repId: BigInt(repId),
@@ -92,15 +87,13 @@ export default function ReturnsPage() {
           date: timestamp,
         });
       }
-
       toast.success("Return added successfully");
       setRepId("");
       setDate(new Date().toISOString().split("T")[0]);
       setItems([{ productId: "", quantity: "1" }]);
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || "Failed to add return";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Failed to add return");
       console.error(error);
     }
   };
@@ -113,15 +106,12 @@ export default function ReturnsPage() {
       Number(r.quantity),
       formatDate(r.date),
     ]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("returns.csv", csv);
+    downloadCSV("returns.csv", generateCSV(headers, rows));
   };
 
   const filteredReturns = returns.filter((r) => {
-    const date = new Date(Number(r.date) / 1_000_000);
-    const matchesStart = !startDate || date >= startDate;
-    const matchesEnd = !endDate || date <= endDate;
-    return matchesStart && matchesEnd;
+    const d = new Date(Number(r.date) / 1_000_000);
+    return (!startDate || d >= startDate) && (!endDate || d <= endDate);
   });
 
   return (
@@ -146,14 +136,12 @@ export default function ReturnsPage() {
             onClick={exportReturns}
             disabled={filteredReturns.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Return
+                <Plus className="mr-2 h-4 w-4" /> Add Return
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -224,7 +212,7 @@ export default function ReturnsPage() {
             </div>
           ) : filteredReturns.length === 0 ? (
             <div className="py-12 text-center text-sm text-muted-foreground">
-              No returns found. Add your first return to get started.
+              No returns found.
             </div>
           ) : (
             <Table>
@@ -238,6 +226,7 @@ export default function ReturnsPage() {
               </TableHeader>
               <TableBody>
                 {filteredReturns.map((returnItem, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {reps[Number(returnItem.repId)]?.name || "Unknown"}

@@ -47,8 +47,7 @@ export default function LineItemsEditor({
       <div className="flex items-center justify-between">
         <Label>Line Items</Label>
         <Button type="button" variant="outline" size="sm" onClick={addItem}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Item
+          <Plus className="mr-2 h-4 w-4" /> Add Item
         </Button>
       </div>
 
@@ -61,6 +60,7 @@ export default function LineItemsEditor({
       <div className="space-y-3">
         {items.map((item, index) => (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: mutable list keyed by position
             key={index}
             className="flex gap-3 rounded-lg border border-border p-4"
           >

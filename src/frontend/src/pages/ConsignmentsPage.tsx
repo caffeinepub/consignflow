@@ -62,12 +62,10 @@ export default function ConsignmentsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!repId) {
       toast.error("Please select a rep");
       return;
     }
-
     if (
       items.length === 0 ||
       items.some((item) => !item.productId || !item.quantity)
@@ -75,15 +73,12 @@ export default function ConsignmentsPage() {
       toast.error("Please add at least one complete line item");
       return;
     }
-
     if (lockCheck.isLocked) {
       toast.error("Cannot add consignment in closed settlement period");
       return;
     }
-
     try {
       const timestamp = BigInt(new Date(date).getTime() * 1_000_000);
-
       for (const item of items) {
         await addConsignment.mutateAsync({
           repId: BigInt(repId),
@@ -92,15 +87,13 @@ export default function ConsignmentsPage() {
           date: timestamp,
         });
       }
-
       toast.success("Consignment added successfully");
       setRepId("");
       setDate(new Date().toISOString().split("T")[0]);
       setItems([{ productId: "", quantity: "1" }]);
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || "Failed to add consignment";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Failed to add consignment");
       console.error(error);
     }
   };
@@ -113,15 +106,12 @@ export default function ConsignmentsPage() {
       Number(c.quantity),
       formatDate(c.date),
     ]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("consignments.csv", csv);
+    downloadCSV("consignments.csv", generateCSV(headers, rows));
   };
 
   const filteredConsignments = consignments.filter((c) => {
-    const date = new Date(Number(c.date) / 1_000_000);
-    const matchesStart = !startDate || date >= startDate;
-    const matchesEnd = !endDate || date <= endDate;
-    return matchesStart && matchesEnd;
+    const d = new Date(Number(c.date) / 1_000_000);
+    return (!startDate || d >= startDate) && (!endDate || d <= endDate);
   });
 
   return (
@@ -146,14 +136,12 @@ export default function ConsignmentsPage() {
             onClick={exportConsignments}
             disabled={filteredConsignments.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Consignment
+                <Plus className="mr-2 h-4 w-4" /> Add Consignment
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -246,6 +234,7 @@ export default function ConsignmentsPage() {
               </TableHeader>
               <TableBody>
                 {filteredConsignments.map((consignment, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {reps[Number(consignment.repId)]?.name || "Unknown"}

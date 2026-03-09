@@ -67,12 +67,10 @@ export default function SalesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!repId) {
       toast.error("Please select a rep");
       return;
     }
-
     if (
       items.length === 0 ||
       items.some((item) => !item.productId || !item.quantity || !item.unitPrice)
@@ -80,15 +78,12 @@ export default function SalesPage() {
       toast.error("Please add at least one complete line item");
       return;
     }
-
     if (lockCheck.isLocked) {
       toast.error("Cannot add sale in closed settlement period");
       return;
     }
-
     try {
       const timestamp = BigInt(new Date(date).getTime() * 1_000_000);
-
       for (const item of items) {
         await addSale.mutateAsync({
           repId: BigInt(repId),
@@ -100,15 +95,13 @@ export default function SalesPage() {
           date: timestamp,
         });
       }
-
       toast.success("Sale added successfully");
       setRepId("");
       setDate(new Date().toISOString().split("T")[0]);
       setItems([{ productId: "", quantity: "1", unitPrice: "" }]);
       setIsDialogOpen(false);
     } catch (error: any) {
-      const errorMessage = error?.message || "Failed to add sale";
-      toast.error(errorMessage);
+      toast.error(error?.message || "Failed to add sale");
       console.error(error);
     }
   };
@@ -130,15 +123,12 @@ export default function SalesPage() {
       formatCurrency(Number(s.unitPrice) * Number(s.quantity)),
       formatDate(s.date),
     ]);
-    const csv = generateCSV(headers, rows);
-    downloadCSV("sales.csv", csv);
+    downloadCSV("sales.csv", generateCSV(headers, rows));
   };
 
   const filteredSales = sales.filter((s) => {
-    const date = new Date(Number(s.date) / 1_000_000);
-    const matchesStart = !startDate || date >= startDate;
-    const matchesEnd = !endDate || date <= endDate;
-    return matchesStart && matchesEnd;
+    const d = new Date(Number(s.date) / 1_000_000);
+    return (!startDate || d >= startDate) && (!endDate || d <= endDate);
   });
 
   return (
@@ -161,14 +151,12 @@ export default function SalesPage() {
             onClick={exportSales}
             disabled={filteredSales.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Sale
+                <Plus className="mr-2 h-4 w-4" /> Add Sale
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -259,6 +247,7 @@ export default function SalesPage() {
               </TableHeader>
               <TableBody>
                 {filteredSales.map((sale, index) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: no unique ID available
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {reps[Number(sale.repId)]?.name || "Unknown"}

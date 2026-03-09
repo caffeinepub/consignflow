@@ -43,9 +43,9 @@ export default function CommissionSettingsDialog({
       const settings = getCommissionSettings();
       setDefaultRate(String(settings.defaultCommission));
       const overrideMap: Record<number, string> = {};
-      Object.entries(settings.repOverrides).forEach(([repId, rate]) => {
+      for (const [repId, rate] of Object.entries(settings.repOverrides)) {
         overrideMap[Number(repId)] = String(rate);
-      });
+      }
       setOverrides(overrideMap);
     }
   }, [open]);
@@ -59,7 +59,7 @@ export default function CommissionSettingsDialog({
 
     setDefaultCommission(rate);
 
-    Object.entries(overrides).forEach(([repId, value]) => {
+    for (const [repId, value] of Object.entries(overrides)) {
       const overrideRate = value ? Number.parseFloat(value) : null;
       if (
         overrideRate !== null &&
@@ -69,7 +69,7 @@ export default function CommissionSettingsDialog({
         return;
       }
       setRepCommissionOverride(Number(repId), overrideRate);
-    });
+    }
 
     toast.success("Commission settings saved");
     onOpenChange(false);
@@ -113,6 +113,7 @@ export default function CommissionSettingsDialog({
                 </TableHeader>
                 <TableBody>
                   {reps.map((rep, index) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: index is the rep identifier
                     <TableRow key={index}>
                       <TableCell className="font-medium">{rep.name}</TableCell>
                       <TableCell>

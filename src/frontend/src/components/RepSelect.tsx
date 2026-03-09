@@ -37,6 +37,7 @@ export default function RepSelect({
       </SelectTrigger>
       <SelectContent>
         {reps?.map((rep, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: index is the rep ID
           <SelectItem key={index} value={String(index)}>
             {rep.name}
           </SelectItem>

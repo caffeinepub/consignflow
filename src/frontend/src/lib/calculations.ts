@@ -118,17 +118,14 @@ export function calculateInventoryByRep(
 
   const inventory: Map<string, InventoryItem> = new Map();
 
-  // Add consignments
-  consignments.forEach((c) => {
+  for (const c of consignments) {
     const matchesDate =
       (!startTimestamp || c.date >= startTimestamp) &&
       (!endTimestamp || c.date <= endTimestamp);
-    if (!matchesDate) return;
-
+    if (!matchesDate) continue;
     const key = `${c.repId}-${c.productId}`;
     const existing = inventory.get(key);
     const product = products[Number(c.productId)];
-
     if (existing) {
       existing.quantity += Number(c.quantity);
     } else {
@@ -140,35 +137,27 @@ export function calculateInventoryByRep(
         quantity: Number(c.quantity),
       });
     }
-  });
+  }
 
-  // Subtract sales
-  sales.forEach((s) => {
+  for (const s of sales) {
     const matchesDate =
       (!startTimestamp || s.date >= startTimestamp) &&
       (!endTimestamp || s.date <= endTimestamp);
-    if (!matchesDate) return;
-
+    if (!matchesDate) continue;
     const key = `${s.repId}-${s.productId}`;
     const existing = inventory.get(key);
-    if (existing) {
-      existing.quantity -= Number(s.quantity);
-    }
-  });
+    if (existing) existing.quantity -= Number(s.quantity);
+  }
 
-  // Subtract returns
-  returns.forEach((r) => {
+  for (const r of returns) {
     const matchesDate =
       (!startTimestamp || r.date >= startTimestamp) &&
       (!endTimestamp || r.date <= endTimestamp);
-    if (!matchesDate) return;
-
+    if (!matchesDate) continue;
     const key = `${r.repId}-${r.productId}`;
     const existing = inventory.get(key);
-    if (existing) {
-      existing.quantity -= Number(r.quantity);
-    }
-  });
+    if (existing) existing.quantity -= Number(r.quantity);
+  }
 
   return Array.from(inventory.values()).filter((item) => item.quantity !== 0);
 }

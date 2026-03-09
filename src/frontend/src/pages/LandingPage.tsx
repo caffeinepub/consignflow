@@ -52,7 +52,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -77,7 +76,6 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
@@ -112,12 +110,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Value Blocks */}
       <section className="container mx-auto px-4 py-16">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {valueBlocks.map((block, index) => {
             const Icon = block.icon;
             return (
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list
               <Card key={index} className="border-border">
                 <CardHeader>
                   <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -136,7 +134,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="mt-20 border-t border-border bg-card/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © {currentYear}. Built with{" "}
